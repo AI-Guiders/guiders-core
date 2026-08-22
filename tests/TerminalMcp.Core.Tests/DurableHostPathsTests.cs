@@ -48,6 +48,8 @@ public sealed class DurableHostPathsTests
     [Theory]
     [InlineData(@"D:\cdp-mcp-debug\CdpMcp.exe", "cdp-debug")]
     [InlineData(@"D:\cdp-mcp\CdpMcp.exe", "cdp")]
+    [InlineData("/opt/cdp-mcp-debug/CdpMcp", "cdp-debug")]
+    [InlineData("/opt/cdp-mcp/CdpMcp", "cdp")]
     [InlineData(null, null)]
     public void DeriveIgniteSeat_maps_install_roots(string? worker, string? seat) =>
         Assert.Equal(seat, DurableHostPaths.DeriveIgniteSeat(worker));

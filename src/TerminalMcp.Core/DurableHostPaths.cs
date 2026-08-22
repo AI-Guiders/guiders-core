@@ -127,17 +127,50 @@ public static class DurableHostPaths
     {
         if (string.IsNullOrWhiteSpace(workerExePath))
             return null;
-        var root = Path.GetDirectoryName(Path.GetFullPath(workerExePath));
-        if (string.IsNullOrWhiteSpace(root))
-            return null;
-        var leaf = Path.GetFileName(root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-        return leaf switch
+
+        foreach (var segment in EnumeratePathSegments(workerExePath))
         {
-            "cdp-mcp-debug" => "cdp-debug",
-            "cdp-mcp" => "cdp",
-            _ => null
-        };
+            var seat = MapInstallFolder(segment);
+            if (seat != null)
+                return seat;
+        }
+
+        try
+        {
+            var full = Path.GetFullPath(workerExePath);
+            if (!string.Equals(full, workerExePath, StringComparison.Ordinal))
+            {
+                foreach (var segment in EnumeratePathSegments(full))
+                {
+                    var seat = MapInstallFolder(segment);
+                    if (seat != null)
+                        return seat;
+                }
+            }
+        }
+        catch (ArgumentException)
+        {
+            // ignore invalid paths
+        }
+
+        return null;
     }
+
+    static IEnumerable<string> EnumeratePathSegments(string path)
+    {
+        foreach (var segment in path.Split('\\', '/'))
+        {
+            if (!string.IsNullOrEmpty(segment))
+                yield return segment;
+        }
+    }
+
+    static string? MapInstallFolder(string folderName) => folderName switch
+    {
+        "cdp-mcp-debug" => "cdp-debug",
+        "cdp-mcp" => "cdp",
+        _ => null
+    };
 
     static bool TryExistingFile(string? path, out string? fullPath)
     {
