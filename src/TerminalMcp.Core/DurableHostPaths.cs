@@ -123,15 +123,18 @@ public static class DurableHostPaths
         }
     }
 
+    /// <summary>
+    /// Maps a worker binary path to ignite seat id (<c>cdp</c> | <c>cdp-debug</c>).
+    /// OS-agnostic: recognizes Windows deploy dirs (<c>cdp-mcp*</c>) and Unix/Mac AIGuiders layout (<c>cdp</c> / <c>cdp-debug</c>).
+    /// </summary>
     public static string? DeriveIgniteSeat(string? workerExePath)
     {
         if (string.IsNullOrWhiteSpace(workerExePath))
             return null;
 
-        foreach (var segment in EnumeratePathSegments(workerExePath))
+        foreach (var segment in EnumerateDirectorySegments(workerExePath))
         {
-            var seat = MapInstallFolder(segment);
-            if (seat != null)
+            if (TryMapInstallFolder(segment, out var seat))
                 return seat;
         }
 
@@ -140,37 +143,54 @@ public static class DurableHostPaths
             var full = Path.GetFullPath(workerExePath);
             if (!string.Equals(full, workerExePath, StringComparison.Ordinal))
             {
-                foreach (var segment in EnumeratePathSegments(full))
+                foreach (var segment in EnumerateDirectorySegments(full))
                 {
-                    var seat = MapInstallFolder(segment);
-                    if (seat != null)
+                    if (TryMapInstallFolder(segment, out var seat))
                         return seat;
                 }
             }
         }
         catch (ArgumentException)
         {
-            // ignore invalid paths
+            // ignore invalid paths on this host
         }
 
         return null;
     }
 
+    /// <summary>Install folder leaf → ignite seat (see <see cref="EnumerateCdpInstallRoots"/>).</summary>
+    static bool TryMapInstallFolder(string folderName, out string seat) =>
+        InstallFolderToSeat.TryGetValue(folderName, out seat!);
+
+    static readonly Dictionary<string, string> InstallFolderToSeat =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["cdp-mcp-debug"] = "cdp-debug",
+            ["cdp-debug"] = "cdp-debug",
+            ["cdp-mcp"] = "cdp",
+            ["cdp"] = "cdp",
+        };
+
+    static IEnumerable<string> EnumerateDirectorySegments(string workerExePath)
+    {
+        foreach (var segment in EnumeratePathSegments(workerExePath).Reverse())
+            yield return segment;
+    }
+
     static IEnumerable<string> EnumeratePathSegments(string path)
     {
+        var segments = new List<string>();
         foreach (var segment in path.Split('\\', '/'))
         {
             if (!string.IsNullOrEmpty(segment))
-                yield return segment;
+                segments.Add(segment);
         }
-    }
 
-    static string? MapInstallFolder(string folderName) => folderName switch
-    {
-        "cdp-mcp-debug" => "cdp-debug",
-        "cdp-mcp" => "cdp",
-        _ => null
-    };
+        if (segments.Count > 0)
+            segments.RemoveAt(segments.Count - 1);
+
+        return segments;
+    }
 
     static bool TryExistingFile(string? path, out string? fullPath)
     {
