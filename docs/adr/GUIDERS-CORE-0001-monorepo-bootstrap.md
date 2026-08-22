@@ -12,9 +12,10 @@ AI Guiders shipped ~18 backend libraries as separate `*-core` GitHub repos. Cros
 2. **Package IDs unchanged** — NuGet consumers keep existing names/versions.
 3. **Import scripts** — `scripts/import-core-packages.ps1` + `fix-references.ps1` for one-shot migration from legacy repos.
 4. **Products** (`cdp-mcp`, etc.) resolve via `GuidersCoreRoot` sibling `ProjectReference` or NuGet (`AidUseNuGet`).
+5. **NuGet publish** — single Trusted Publishing policy: `AI-Guiders/guiders-core` + `release.yml` (see `docs/nuget-publishing.md`).
 
 ## Consequences
 
 - Legacy repos get deprecation README pointing here.
-- Per-package Trusted Publishing workflows added incrementally.
+- Per-package Trusted Publishing replaced by monorepo `release.yml`.
 - Smoke/tool projects from old repos are **not** migrated (library surface only).

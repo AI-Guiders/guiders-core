@@ -11,7 +11,6 @@
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Evidence preprocess: pipe/diag/test/build text → evidence/v0 with Anchor wires (shared agent+human locus surface).</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>cdp;evidence;anchors;msbuild;agent-ide</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>

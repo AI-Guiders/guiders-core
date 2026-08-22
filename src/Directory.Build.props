@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <PackageProjectUrl>https://github.com/AI-Guiders/guiders-core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AI-Guiders/guiders-core.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

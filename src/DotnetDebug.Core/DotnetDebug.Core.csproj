@@ -13,8 +13,6 @@
     <Description>Общее ядро для dotnet-debug-mcp и IDE: DAP-клиент (netcoredbg), хелперы DAP, stop-context / frame inspection, хранение брейкпоинтов (.dotnet-debug-mcp-breakpoints.json).</Description>
     <!-- NuGet gallery: только потребительский текст; мейнтейнеры — docs/nuget-publishing.md -->
     <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/AI-Guiders/dotnet-debug-core</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

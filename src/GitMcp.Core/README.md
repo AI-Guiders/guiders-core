@@ -2,10 +2,11 @@
 
 Shared construction of `git` CLI argument lists for **git-mcp** and **Cascade IDE** (ADR 0019 in cascade-ide).
 
-## Remotes (политика)
+## Source of truth
 
-- **`origin`** — [AI-Guiders/git-mcp-core](https://github.com/AI-Guiders/git-mcp-core) на GitHub (канон для субмодуля в meta-repo `open`).
-- **`github`** — личное зеркало **[KarataevDmitry/git-mcp-core](https://github.com/KarataevDmitry/git-mcp-core)** при необходимости. **Trusted Publishing** пакета `AIGuiders.GitMcp.Core` на nuget.org.
+Monorepo **[AI-Guiders/guiders-core](https://github.com/AI-Guiders/guiders-core)** — `src/GitMcp.Core/`.
+
+Legacy standalone repo `git-mcp-core` is deprecated.
 
 ## Layout
 
@@ -14,19 +15,17 @@ Shared construction of `git` CLI argument lists for **git-mcp** and **Cascade ID
 
 ## Consumers
 
-- **NuGet (рекомендуется):** пакет [`AIGuiders.GitMcp.Core`](https://www.nuget.org/packages/AIGuiders.GitMcp.Core) — `PackageReference` в `git-mcp` и Cascade IDE; отдельный checkout исходников для сборки не нужен после публикации на nuget.org.
-- **Исходники:** публичный репозиторий **[KarataevDmitry/git-mcp-core](https://github.com/KarataevDmitry/git-mcp-core)** (зеркало GitLab); `ProjectReference` на `GitMcp.Core.csproj` или субмодуль в meta-repo `open`.
+- **NuGet:** [`AIGuiders.GitMcp.Core`](https://www.nuget.org/packages/AIGuiders.GitMcp.Core)
+- **Sibling dev:** `ProjectReference` via `GuidersCoreRoot` (cdp-mcp) or `src/GitMcp.Core/GitMcp.Core.csproj`
 
-## Публикация на nuget.org (Trusted Publishing)
+## Publish
 
-Инструкция NuGet: [Trusted Publishing — GitHub Actions](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing#github-actions-setup). В форме: owner **`KarataevDmitry`**, repository **`git-mcp-core`**, workflow file **`nuget-publish.yml`** (только имя файла). Workflow в репо: **`.github/workflows/nuget-publish.yml`**; запуск — тег **`v*`** или **Actions → Publish to NuGet → workflow_dispatch**.
+Trusted Publishing: `AI-Guiders/guiders-core` + `release.yml` — см. [docs/nuget-publishing.md](../../../docs/nuget-publishing.md).
 
 ## Build
 
 ```bash
-dotnet build
+dotnet build src/GitMcp.Core/GitMcp.Core.csproj
 ```
 
-## Tests
-
-Unit tests for `GitCommandBuilder` live in the **git-mcp** repository (`GitMcp.Tests`).
+Tests for `GitCommandBuilder` live in the **git-mcp** repository (`GitMcp.Tests`).

@@ -23,7 +23,7 @@ dotnet build
 dotnet test
 ```
 
-Per-package `dotnet pack` — Trusted Publishing workflows TBD (mirror guiders-platform).
+Per-package `dotnet pack` — **Trusted Publishing** via [`.github/workflows/release.yml`](../.github/workflows/release.yml); см. [docs/nuget-publishing.md](docs/nuget-publishing.md).
 
 ## Local dev (cdp-mcp)
 

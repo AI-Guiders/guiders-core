@@ -11,7 +11,6 @@
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Shared AutoIgnition arm store + habitat wake latch for CDP MCP and terminal-mcp siblings.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Cdp.Ignite.Client.Tests\**" />

@@ -12,7 +12,7 @@
 | `src/AgentTaskKnowledge.Core` | `AIGuiders.AgentTaskKnowledge.Core` | agent-task-knowledge-core |
 | `src/AgentFindings.Core` | `AIGuiders.AgentFindings.Core` | agent-findings-core |
 | `src/AgentFailures.Core` | `AIGuiders.AgentFailures.Core` | agent-failures-core |
-| `src/DotnetDebug.Core` | `AIGuiders.DotnetDebug.Core` | dotnet-debug-core |
+| `src/DotnetDebug.Core` | `AIGuiders.DotnetDebugMCP.Core` | dotnet-debug-core |
 | `src/DotNetBuildTestParsers` | `AIGuiders.DotNetBuildTestParsers` | dotnet-build-test-parsers |
 | `src/DotNetBuildTest.Core` | `AIGuiders.DotNetBuildTest.Core` | dotnet-build-test-core |
 | `src/RoslynMcp.Core` | `AIGuiders.RoslynMcp.Core` | roslyn-mcp-core |

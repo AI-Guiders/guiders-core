@@ -7,22 +7,13 @@
     <LangVersion>14</LangVersion>
     <RootNamespace>DotNetBuildTestParsers</RootNamespace>
     <AssemblyName>DotNetBuildTestParsers</AssemblyName>
-    <!-- NuGet: Trusted Publishing привязывай к репо https://github.com/KarataevDmitry/dotnet-build-test-parsers -->
     <PackageId>AIGuiders.DotNetBuildTestParsers</PackageId>
     <Version>0.1.2</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Parse dotnet build and dotnet test console output into structured diagnostics and test summaries. Shared by dotnet-build-test-mcp and Cascade IDE.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/KarataevDmitry/dotnet-build-test-parsers</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/KarataevDmitry/dotnet-build-test-parsers.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet;msbuild;dotnet-test;mcp;cascade-ide;parser</PackageTags>
     <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 

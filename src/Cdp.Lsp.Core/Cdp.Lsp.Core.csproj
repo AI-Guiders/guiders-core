@@ -6,8 +6,9 @@
     <LangVersion>14</LangVersion>
     <RootNamespace>Cdp.Lsp</RootNamespace>
     <AssemblyName>Cdp.Lsp.Core</AssemblyName>
+    <PackageId>AIGuiders.Cdp.Lsp.Core</PackageId>
     <Version>0.1.2</Version>
     <Description>CDP Language Server Protocol client — stdio JSON-RPC for commodity IDE verbs.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>cdp;lsp;languageserver;ide</PackageTags>
   </PropertyGroup>
 </Project>

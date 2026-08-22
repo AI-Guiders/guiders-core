@@ -7,22 +7,13 @@
     <LangVersion>preview</LangVersion>
     <RootNamespace>AgentNotes.Core</RootNamespace>
     <AssemblyName>AgentNotes.Core</AssemblyName>
-    <!-- NuGet: https://github.com/KarataevDmitry/AIGuiders.AgentNotes.Core -->
     <PackageId>AIGuiders.AgentNotes.Core</PackageId>
     <Version>2.2.2</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Shared storage, hot-context routing, and embedded defaults for Agent Notes (MCP host and Cascade IDE).</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/KarataevDmitry/AIGuiders.AgentNotes.Core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/KarataevDmitry/AIGuiders.AgentNotes.Core.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>agent-notes;mcp;modelcontextprotocol;cascade-ide</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>

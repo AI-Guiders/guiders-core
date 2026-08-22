@@ -8,14 +8,10 @@
     <RootNamespace>RoslynMcp</RootNamespace>
     <AssemblyName>RoslynMcp.Core</AssemblyName>
     <Description>Shared Roslyn workspace layer for RoslynMcp (stdio MCP) and IDE hosts: code actions, rename, diagnostics, navigation.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>AIGuiders.RoslynMcp.Core</PackageId>
     <Version>0.1.11</Version>
     <Authors>LonelySoul; AIGuiders</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/AI-Guiders/roslyn-mcp-core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AI-Guiders/roslyn-mcp-core</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>roslyn;mcp;csharp;refactoring;code-analysis</PackageTags>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>

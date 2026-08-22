@@ -6,7 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TerminalMcp.Core</RootNamespace>
     <AssemblyName>TerminalMcp.Core</AssemblyName>
+    <PackageId>AIGuiders.TerminalMcp.Core</PackageId>
     <Version>0.1.5</Version>
+    <Description>Durable shell habitat for MCP: job store, supervisor bridge, pwsh/cmd argv templates.</Description>
+    <PackageTags>terminal;mcp;shell;durable;cdp;habitat</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="TerminalMcp.Core.Tests" />

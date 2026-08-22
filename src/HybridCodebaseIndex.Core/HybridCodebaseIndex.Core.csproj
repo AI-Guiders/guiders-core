@@ -8,14 +8,10 @@
     <RootNamespace>HybridCodebaseIndex.Core</RootNamespace>
     <AssemblyName>HybridCodebaseIndex.Core</AssemblyName>
     <Description>Гибридный индекс кодовой базы: SQLite FTS5, опционально vec/эмбеддинги, сканер workspace.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>AIGuiders.HybridCodebaseIndex.Core</PackageId>
     <Version>0.1.3</Version>
     <Authors>LonelySoul; AIGuiders</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/AI-Guiders/hybrid-codebase-index-core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AI-Guiders/hybrid-codebase-index-core</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>fts;sqlite;codebase;index;mcp;embedding</PackageTags>
   </PropertyGroup>
 

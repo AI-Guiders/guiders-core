@@ -6,8 +6,9 @@
     <LangVersion>14</LangVersion>
     <RootNamespace>TypescriptLang</RootNamespace>
     <AssemblyName>TypescriptLang.Core</AssemblyName>
+    <PackageId>AIGuiders.TypescriptLang.Core</PackageId>
     <Version>0.1.0</Version>
     <Description>CDP TypeScript LanguageService host — spawns Node worker (typescript package).</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>cdp;typescript;languageservice;lsp</PackageTags>
   </PropertyGroup>
 </Project>

@@ -11,16 +11,8 @@
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Cognitive Dev Platform shared catalog: Memory.*/dev tool affordances, phase×object×language ranking (Cursor CDP MCP + Cascade IDE).</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/AI-Guiders/cdp-core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AI-Guiders/cdp-core.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>cdp;mcp;cascade-ide;agent-affordances;modelcontextprotocol</PackageTags>
     <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
