@@ -1,0 +1,91 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HybridCodebaseIndex.Core</RootNamespace>
+    <AssemblyName>HybridCodebaseIndex.Core</AssemblyName>
+    <Description>Гибридный индекс кодовой базы: SQLite FTS5, опционально vec/эмбеддинги, сканер workspace.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>AIGuiders.HybridCodebaseIndex.Core</PackageId>
+    <Version>0.1.3</Version>
+    <Authors>LonelySoul; AIGuiders</Authors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/AI-Guiders/hybrid-codebase-index-core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AI-Guiders/hybrid-codebase-index-core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>fts;sqlite;codebase;index;mcp;embedding</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="HybridCodebaseIndex.Core.Tests\**" />
+    <None Remove="HybridCodebaseIndex.Core.Tests\**" />
+    <EmbeddedResource Remove="HybridCodebaseIndex.Core.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <!-- Override transitive 2.1.11 (CVE-2025-6965 / GHSA-2m69-gcr7-jv3q); bundles SQLite >= 3.50.2. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+    <PackageReference Include="Ignore" Version="0.2.1" />
+    <PackageReference Include="Tomlyn" Version="2.3.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.22.0" />
+    <PackageReference Include="BERTTokenizers" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DefaultSettings\settings.default.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>HybridCodebaseIndex.Core.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="SqliteFtsIndex.DocDraft.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Meta.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Paths.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Query.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Reindex.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Reindex.FullRebuild.cs">
+      <DependentUpon>SqliteFtsIndex.Reindex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Reindex.Helpers.cs">
+      <DependentUpon>SqliteFtsIndex.Reindex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Reindex.Incremental.cs">
+      <DependentUpon>SqliteFtsIndex.Reindex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Schema.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Status.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.Vec.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SqliteFtsIndex.VecSearch.cs">
+      <DependentUpon>SqliteFtsIndex.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

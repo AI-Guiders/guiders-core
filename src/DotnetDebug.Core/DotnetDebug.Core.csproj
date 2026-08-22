@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>DotnetDebug.Core</RootNamespace>
+    <AssemblyName>DotnetDebug.Core</AssemblyName>
+    <PackageId>AIGuiders.DotnetDebugMCP.Core</PackageId>
+    <Version>0.2.1</Version>
+    <Authors>Dmitry Karataev</Authors>
+    <Description>Общее ядро для dotnet-debug-mcp и IDE: DAP-клиент (netcoredbg), хелперы DAP, stop-context / frame inspection, хранение брейкпоинтов (.dotnet-debug-mcp-breakpoints.json).</Description>
+    <!-- NuGet gallery: только потребительский текст; мейнтейнеры — docs/nuget-publishing.md -->
+    <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/AI-Guiders/dotnet-debug-core</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="PACKAGE_README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

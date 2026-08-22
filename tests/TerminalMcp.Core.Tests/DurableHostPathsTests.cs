@@ -1,0 +1,54 @@
+using TerminalMcp.Core;
+using Xunit;
+
+namespace TerminalMcp.Core.Tests;
+
+public sealed class DurableHostPathsTests
+{
+    [Fact]
+    public void Binary_names_rid_aware()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.Equal("CdpMcp.exe", DurableHostPaths.CdpMcpBinaryName);
+            Assert.Equal("TerminalMcp.Supervisor.exe", DurableHostPaths.SupervisorBinaryName);
+        }
+        else
+        {
+            Assert.Equal("CdpMcp", DurableHostPaths.CdpMcpBinaryName);
+            Assert.Equal("TerminalMcp.Supervisor", DurableHostPaths.SupervisorBinaryName);
+        }
+    }
+
+    [Fact]
+    public void ResolveCdpMcpExe_prefers_worker_hint()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "durable-host-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        var bin = Path.Combine(dir, DurableHostPaths.CdpMcpBinaryName);
+        File.WriteAllText(bin, OperatingSystem.IsWindows() ? "" : "#!/bin/sh\n");
+
+        try
+        {
+            var hit = DurableHostPaths.ResolveCdpMcpExe(bin);
+            Assert.Equal(Path.GetFullPath(bin), hit);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* ignore */ }
+        }
+    }
+
+    [Fact]
+    public void EnumerateAiguidersRoots_non_empty()
+    {
+        Assert.NotEmpty(DurableHostPaths.EnumerateAiguidersRoots().ToList());
+    }
+
+    [Theory]
+    [InlineData(@"D:\cdp-mcp-debug\CdpMcp.exe", "cdp-debug")]
+    [InlineData(@"D:\cdp-mcp\CdpMcp.exe", "cdp")]
+    [InlineData(null, null)]
+    public void DeriveIgniteSeat_maps_install_roots(string? worker, string? seat) =>
+        Assert.Equal(seat, DurableHostPaths.DeriveIgniteSeat(worker));
+}

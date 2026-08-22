@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Cdp.Ignite.Client</RootNamespace>
+    <AssemblyName>Cdp.Ignite.Client</AssemblyName>
+    <PackageId>AIGuiders.Cdp.Ignite.Client</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Dmitry Karataev; AIGuiders</Authors>
+    <Company>AIGuiders</Company>
+    <Description>Shared AutoIgnition arm store + habitat wake latch for CDP MCP and terminal-mcp siblings.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Cdp.Ignite.Client.Tests\**" />
+    <None Remove="Cdp.Ignite.Client.Tests\**" />
+    <Content Remove="Cdp.Ignite.Client.Tests\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Cdp.Ignite.Client.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

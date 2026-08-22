@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TerminalMcp.Core</RootNamespace>
+    <AssemblyName>TerminalMcp.Core</AssemblyName>
+    <Version>0.1.5</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="TerminalMcp.Core.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="TerminalMcp.Core.Tests/**" />
+    <None Remove="TerminalMcp.Core.Tests/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="templates\pwsh-host.ps1" LogicalName="TerminalMcp.Core.templates.pwsh-host.ps1" />
+    <EmbeddedResource Include="templates\cmd-runner.cmd" LogicalName="TerminalMcp.Core.templates.cmd-runner.cmd" />
+  </ItemGroup>
+</Project>

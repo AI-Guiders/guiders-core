@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>Cdp.Evidence</RootNamespace>
+    <AssemblyName>Cdp.Evidence</AssemblyName>
+    <PackageId>AIGuiders.Cdp.Evidence</PackageId>
+    <Version>0.1.1</Version>
+    <Authors>Dmitry Karataev; AIGuiders</Authors>
+    <Company>AIGuiders</Company>
+    <Description>Evidence preprocess: pipe/diag/test/build text → evidence/v0 with Anchor wires (shared agent+human locus surface).</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>cdp;evidence;anchors;msbuild;agent-ide</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Cdp.Evidence.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Cdp.Evidence.Tests/**" />
+    <None Remove="Cdp.Evidence.Tests/**" />
+  </ItemGroup>
+</Project>

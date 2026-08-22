@@ -1,0 +1,67 @@
+# HybridCodebaseIndex.Core
+
+Библиотека **`AIGuiders.HybridCodebaseIndex.Core`**: локальный гибридный индекс для кода (SQLite **FTS5** + опционально векторный канал и эмбеддинги через ONNX), сканирование workspace, настройки через TOML.  
+Используется в [Hybrid Codebase Index MCP](https://github.com/AI-Guiders/hybrid-codebase-index) и во встроенном контуре **HCI** [Cascade IDE](https://github.com/AI-Guiders/cascade-ide).
+
+Лицензия: **MIT** ([LICENSE](LICENSE)). Авторство: **LonelySoul** / **AIGuiders**.
+
+---
+
+## Возможности
+
+- Индекс документов в SQLite с полнотекстом (FTS5) и метаданными.
+- Режим **scope**: workspace и/или solution (несколько баз под общим корнем).
+- Опционально: эмбеддинги, гибридный поиск (настраивается в `IndexSettings` / `settings.default.toml`).
+- Встраиваемый дефолтный конфиг: `DefaultSettings/settings.default.toml` (embedded resource).
+
+Подробнее о тулсах MCP и сценариях — в репозитории [hybrid-codebase-index](https://github.com/AI-Guiders/hybrid-codebase-index) (`docs/`).
+
+### CamelCase / FTS densify (v0.1.3+)
+
+SQLite FTS5 `unicode61` keeps `PlanBoardLeaf` as one token, so middle segments like `BoardLeaf` miss.
+Core expands CamelCase identifiers into segment tokens at index time (`__hci_camel:`) and splits MATCH queries
+(`BoardLeaf` → full prefix OR (`Board` AND `Leaf`)). Reindex required after upgrade.
+
+### Reindex observers (v0.1.2+)
+
+При `FullReindexAsync` / `FullRebuildAsync` можно передать `IReadOnlyList<ICodebaseIndexReindexObserver>`:
+для каждого проиндексированного файла вызывается `OnFileIndexed(IndexedFileEvent)` с **уже прочитанным** текстом.
+Поток — фоновый reindex; observer не должен блокировать надолго.
+
+Cascade IDE регистрирует `IntercomSymbolLineHciReindexObserver` и строит symbol sidecar attach без второго `ReadAllText` по репозиторию.
+
+---
+
+## Установка
+
+```bash
+dotnet add package AIGuiders.HybridCodebaseIndex.Core --version 0.1.3
+```
+
+Актуальная версия: [nuget.org](https://www.nuget.org/packages/AIGuiders.HybridCodebaseIndex.Core).
+
+---
+
+## Сборка локально
+
+```bash
+dotnet build HybridCodebaseIndex.Core.csproj -c Release
+dotnet pack HybridCodebaseIndex.Core.csproj -c Release -o ./out
+```
+
+---
+
+## Публикация на nuget.org (Trusted Publishing)
+
+Долгоживущий API key не требуется: [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing) + шаг **`NuGet/login@v1`** в [workflow](.github/workflows/publish-nuget.yml).
+
+На **nuget.org** добавь политику: **Repository owner** `AI-Guiders`, **Repository** `hybrid-codebase-index-core`, **Workflow file** `publish-nuget.yml`.  
+В workflow указан вход **`user: LonelySoul`** — совпадай с учётной записью, у которой политика и владение пакетом.
+
+Публикация: тег **`v0.x.y`** или **Run workflow** с версией без префикса `v`.
+
+---
+
+## Репозиторий
+
+<https://github.com/AI-Guiders/hybrid-codebase-index-core>

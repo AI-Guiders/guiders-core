@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.DS_Store
+.hybrid-codebase-index/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

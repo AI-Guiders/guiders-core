@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>AgentNotesMcp</RootNamespace>
+    <AssemblyName>AgentNotes.Mcp.Hosting</AssemblyName>
+    <Version>2.2.1</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
+    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.2.1" Condition="!Exists('..\AgentNotes.Core\AgentNotes.Core.csproj')" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('..\AgentNotes.Core\AgentNotes.Core.csproj')">
+    <ProjectReference Include="..\AgentNotes.Core\AgentNotes.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>AgentNotesMcp</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>AgentNotesMcp.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>ExportMcpManifest</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>CdpMcp</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

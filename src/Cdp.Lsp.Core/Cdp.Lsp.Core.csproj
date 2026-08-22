@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>Cdp.Lsp</RootNamespace>
+    <AssemblyName>Cdp.Lsp.Core</AssemblyName>
+    <Version>0.1.2</Version>
+    <Description>CDP Language Server Protocol client — stdio JSON-RPC for commodity IDE verbs.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

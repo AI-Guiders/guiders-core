@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AgentFailures.Core/AgentFailures.Core.csproj" />
+    <Project Path="src/AgentFindings.Core/AgentFindings.Core.csproj" />
+    <Project Path="src/AgentNotes.Core/AgentNotes.Core.csproj" />
+    <Project Path="src/AgentNotes.Mcp.Hosting/AgentNotes.Mcp.Hosting.csproj" />
+    <Project Path="src/AgentTaskKnowledge.Core/AgentTaskKnowledge.Core.csproj" />
+    <Project Path="src/Cdp.Core/Cdp.Core.csproj" />
+    <Project Path="src/Cdp.Evidence/Cdp.Evidence.csproj" />
+    <Project Path="src/Cdp.Ignite.Client/Cdp.Ignite.Client.csproj" />
+    <Project Path="src/Cdp.Lsp.Core/Cdp.Lsp.Core.csproj" />
+    <Project Path="src/Cdp.ScriptableIde/Cdp.ScriptableIde.csproj" />
+    <Project Path="src/DotNetBuildTest.Core/DotNetBuildTest.Core.csproj" />
+    <Project Path="src/DotNetBuildTestParsers/DotNetBuildTestParsers.csproj" />
+    <Project Path="src/DotnetDebug.Core/DotnetDebug.Core.csproj" />
+    <Project Path="src/GitMcp.Core/GitMcp.Core.csproj" />
+    <Project Path="src/HybridCodebaseIndex.Core/HybridCodebaseIndex.Core.csproj" />
+    <Project Path="src/RoslynMcp.Core/RoslynMcp.Core.csproj" />
+    <Project Path="src/TerminalMcp.Core/TerminalMcp.Core.csproj" />
+    <Project Path="src/TypescriptLang.Core/TypescriptLang.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AgentFailures.Core.Tests/AgentFailures.Core.Tests.csproj" />
+    <Project Path="tests/AgentFindings.Core.Tests/AgentFindings.Core.Tests.csproj" />
+    <Project Path="tests/AgentTaskKnowledge.Core.Tests/AgentTaskKnowledge.Core.Tests.csproj" />
+    <Project Path="tests/Cdp.Core.Tests/Cdp.Core.Tests.csproj" />
+    <Project Path="tests/Cdp.Evidence.Tests/Cdp.Evidence.Tests.csproj" />
+    <Project Path="tests/Cdp.Ignite.Client.Tests/Cdp.Ignite.Client.Tests.csproj" />
+    <Project Path="tests/DotNetBuildTest.Core.Tests/DotNetBuildTest.Core.Tests.csproj" />
+    <Project Path="tests/DotNetBuildTestParsers.Tests/DotNetBuildTestParsers.Tests.csproj" />
+    <Project Path="tests/HybridCodebaseIndex.Core.Tests/HybridCodebaseIndex.Core.Tests.csproj" />
+    <Project Path="tests/TerminalMcp.Core.Tests/TerminalMcp.Core.Tests.csproj" />
+  </Folder>
+</Solution>
