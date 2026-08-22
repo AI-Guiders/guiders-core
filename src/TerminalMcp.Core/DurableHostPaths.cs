@@ -1,5 +1,7 @@
 #nullable enable
 
+using System.Text.RegularExpressions;
+
 namespace TerminalMcp.Core;
 
 /// <summary>RID-aware install/binary resolution for durable jobs (ADR-0032).</summary>
@@ -125,42 +127,30 @@ public static class DurableHostPaths
 
     /// <summary>
     /// Maps a worker binary path to ignite seat id (<c>cdp</c> | <c>cdp-debug</c>).
-    /// OS-agnostic: recognizes Windows deploy dirs (<c>cdp-mcp*</c>) and Unix/Mac AIGuiders layout (<c>cdp</c> / <c>cdp-debug</c>).
+    /// OS-agnostic: path literals may use Windows or Unix separators; matching is segment-based.
     /// </summary>
     public static string? DeriveIgniteSeat(string? workerExePath)
     {
         if (string.IsNullOrWhiteSpace(workerExePath))
             return null;
 
-        foreach (var segment in EnumerateDirectorySegments(workerExePath))
-        {
-            if (TryMapInstallFolder(segment, out var seat))
-                return seat;
-        }
+        var directory = workerExePath;
+        var lastSep = Math.Max(directory.LastIndexOf('/'), directory.LastIndexOf('\\'));
+        if (lastSep >= 0)
+            directory = directory[..lastSep];
 
-        try
-        {
-            var full = Path.GetFullPath(workerExePath);
-            if (!string.Equals(full, workerExePath, StringComparison.Ordinal))
-            {
-                foreach (var segment in EnumerateDirectorySegments(full))
-                {
-                    if (TryMapInstallFolder(segment, out var seat))
-                        return seat;
-                }
-            }
-        }
-        catch (ArgumentException)
-        {
-            // ignore invalid paths on this host
-        }
+        Match? last = null;
+        foreach (Match match in InstallFolderSegmentRegex.Matches(directory))
+            last = match;
 
-        return null;
+        if (last == null)
+            return null;
+
+        return MapInstallFolder(last.Groups["folder"].Value);
     }
 
-    /// <summary>Install folder leaf → ignite seat (see <see cref="EnumerateCdpInstallRoots"/>).</summary>
-    static bool TryMapInstallFolder(string folderName, out string seat) =>
-        InstallFolderToSeat.TryGetValue(folderName, out seat!);
+    static string? MapInstallFolder(string folderName) =>
+        InstallFolderToSeat.GetValueOrDefault(folderName);
 
     static readonly Dictionary<string, string> InstallFolderToSeat =
         new(StringComparer.OrdinalIgnoreCase)
@@ -171,26 +161,9 @@ public static class DurableHostPaths
             ["cdp"] = "cdp",
         };
 
-    static IEnumerable<string> EnumerateDirectorySegments(string workerExePath)
-    {
-        foreach (var segment in EnumeratePathSegments(workerExePath).Reverse())
-            yield return segment;
-    }
-
-    static IEnumerable<string> EnumeratePathSegments(string path)
-    {
-        var segments = new List<string>();
-        foreach (var segment in path.Split('\\', '/'))
-        {
-            if (!string.IsNullOrEmpty(segment))
-                segments.Add(segment);
-        }
-
-        if (segments.Count > 0)
-            segments.RemoveAt(segments.Count - 1);
-
-        return segments;
-    }
+    static readonly Regex InstallFolderSegmentRegex = new(
+        @"(?:^|[/\\])(?<folder>cdp-mcp-debug|cdp-mcp|cdp-debug|cdp)(?=[/\\]|$)",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     static bool TryExistingFile(string? path, out string? fullPath)
     {
