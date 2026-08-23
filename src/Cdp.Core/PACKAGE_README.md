@@ -5,9 +5,9 @@ Shared **.NET 10** library for the Cognitive Dev Platform tool catalog:
 `catalog = f(phase, object [, language])` with optional `intent` ranking; wire domains follow **Memory.*** / **dev** intuition (`memory_world`, `memory_task`, `debug`, `build`, …).
 
 **License:** MIT  
-**Source:** [github.com/AI-Guiders/cdp-core](https://github.com/AI-Guiders/cdp-core)
+**Source:** [github.com/AI-Guiders/guiders-core](https://github.com/AI-Guiders/guiders-core) (`src/Cdp.Core/`)
 
-Prefer a sibling `ProjectReference` to `cdp-core` in the monorepo when developing; NuGet for standalone clones / CI.
+Prefer a `ProjectReference` within `guiders-core` when developing; NuGet for standalone clones / CI.
 
 ## Public API (short)
 

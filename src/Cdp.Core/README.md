@@ -6,4 +6,4 @@ Shared catalog core for **CDP** (Cognitive Dev Platform): phase × object tool a
 - **License:** [MIT](LICENSE)
 - **Publish:** [docs/nuget-publishing.md](docs/nuget-publishing.md)
 
-Monorepo path (dev): `Financial/software/open/cdp-core` under Personal Cursor Folder. Canonical GitHub mirror for packaging: [`AI-Guiders/cdp-core`](https://github.com/AI-Guiders/cdp-core).
+Canonical source: [`AI-Guiders/guiders-core`](https://github.com/AI-Guiders/guiders-core) (`src/Cdp.Core/`).

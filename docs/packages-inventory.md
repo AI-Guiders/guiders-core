@@ -1,4 +1,4 @@
-# Core package inventory (guiders-core)
+> **Former repo** — имя удалённого standalone-репо (GitHub, 2026-08-23). SSOT: этот monorepo.
 
 | Folder | NuGet ID (typical) | Former repo |
 |--------|-------------------|-------------|

@@ -7,7 +7,7 @@
     <LangVersion>14</LangVersion>
     <RootNamespace>DotNetBuildTest.Core</RootNamespace>
     <AssemblyName>DotNetBuildTest.Core</AssemblyName>
-    <!-- NuGet: Trusted Publishing → https://github.com/AI-Guiders/dotnet-build-test-core, workflow nuget-publish.yml -->
+    <!-- NuGet: Trusted Publishing → https://github.com/AI-Guiders/guiders-core, workflow release.yml -->
     <PackageId>AIGuiders.DotNetBuildTest.Core</PackageId>
     <Version>0.1.4</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>

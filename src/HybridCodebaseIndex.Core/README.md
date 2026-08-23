@@ -64,4 +64,4 @@ dotnet pack HybridCodebaseIndex.Core.csproj -c Release -o ./out
 
 ## Репозиторий
 
-<https://github.com/AI-Guiders/hybrid-codebase-index-core>
+<https://github.com/AI-Guiders/guiders-core> (`src/HybridCodebaseIndex.Core/`)

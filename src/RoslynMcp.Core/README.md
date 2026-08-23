@@ -29,5 +29,5 @@ Tool names and MCP arguments are documented in the [RoslynMcp](https://github.co
 
 ## Links
 
-- Source: [github.com/AI-Guiders/roslyn-mcp-core](https://github.com/AI-Guiders/roslyn-mcp-core)
+- Source: [github.com/AI-Guiders/guiders-core](https://github.com/AI-Guiders/guiders-core) (`src/RoslynMcp.Core/`)
 - MCP host: [github.com/AI-Guiders/RoslynMcp](https://github.com/AI-Guiders/RoslynMcp)

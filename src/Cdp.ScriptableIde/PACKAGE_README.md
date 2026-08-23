@@ -8,5 +8,5 @@ Facets: Debug / Roslyn / Git / Verify / Symbol / SemanticMap / Work / Refactor /
 <PackageReference Include="AIGuiders.Cdp.ScriptableIde" Version="0.1.48" />
 ```
 
-- **Repo:** https://github.com/AI-Guiders/cdp-scriptable-ide  
+- **Repo:** https://github.com/AI-Guiders/guiders-core (`src/Cdp.ScriptableIde/`)
 - **License:** MIT  

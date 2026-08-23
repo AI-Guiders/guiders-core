@@ -1,6 +1,8 @@
 # NuGet Trusted Publishing — миграция на guiders-core
 
-После **первого успешного** `release` из `AI-Guiders/guiders-core` удали старые политики на nuget.org (иначе тег на deprecated-репо всё ещё сможет пушить пакет).
+После **первого успешного** `release` из `AI-Guiders/guiders-core` удали старые политики на nuget.org (иначе orphaned TP-записи остаются в UI).
+
+> **2026-08-23:** legacy GitHub-репозитории из таблицы ниже **удалены** (не только archived). Осталось вручную убрать старые Trusted Publishing policies на nuget.org.
 
 ## Новая политика (оставить)
 
