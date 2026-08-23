@@ -4,6 +4,7 @@
 |--------|-------------------|-------------|
 | `src/Cdp.Core` | `AIGuiders.Cdp.Core` | cdp-core |
 | `src/Cdp.ScriptableIde` | `AIGuiders.Cdp.ScriptableIde` | cdp-scriptable-ide |
+| `src/Cdp.PackageIntelligence` | `AIGuiders.Cdp.PackageIntelligence` | (new) |
 | `src/Cdp.Evidence` | `AIGuiders.Cdp.Evidence` | cdp-evidence |
 | `src/Cdp.Ignite.Client` | `AIGuiders.Cdp.Ignite.Client` | cdp-ignite-client |
 | `src/Cdp.Lsp.Core` | `AIGuiders.Cdp.Lsp.Core` | lsp-lang |

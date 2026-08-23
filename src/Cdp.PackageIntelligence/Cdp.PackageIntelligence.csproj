@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>Cdp.PackageIntelligence</RootNamespace>
+    <AssemblyName>Cdp.PackageIntelligence</AssemblyName>
+    <PackageId>AIGuiders.Cdp.PackageIntelligence</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Dmitry Karataev; AIGuiders</Authors>
+    <Company>AIGuiders</Company>
+    <Description>In-proc NuGet package intelligence for CDP: vulnerability audit, latest version lookup, upgrade planning, supply-chain review. L1 over PackageOps L0 mutate.</Description>
+    <PackageTags>cdp;nuget;audit;vulnerability;supply-chain;mcp</PackageTags>
+    <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NuGet.Configuration" Version="6.14.3" />
+    <PackageReference Include="NuGet.Protocol" Version="6.14.3" />
+    <PackageReference Include="NuGet.Versioning" Version="6.14.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Cdp.PackageIntelligence.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PACKAGE_README.md" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

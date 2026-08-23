@@ -9,6 +9,7 @@
     <Project Path="src/Cdp.Evidence/Cdp.Evidence.csproj" />
     <Project Path="src/Cdp.Ignite.Client/Cdp.Ignite.Client.csproj" />
     <Project Path="src/Cdp.Lsp.Core/Cdp.Lsp.Core.csproj" />
+    <Project Path="src/Cdp.PackageIntelligence/Cdp.PackageIntelligence.csproj" />
     <Project Path="src/Cdp.ScriptableIde/Cdp.ScriptableIde.csproj" />
     <Project Path="src/DotNetBuildTest.Core/DotNetBuildTest.Core.csproj" />
     <Project Path="src/DotNetBuildTestParsers/DotNetBuildTestParsers.csproj" />
@@ -23,6 +24,7 @@
     <Project Path="tests/AgentFailures.Core.Tests/AgentFailures.Core.Tests.csproj" />
     <Project Path="tests/AgentFindings.Core.Tests/AgentFindings.Core.Tests.csproj" />
     <Project Path="tests/AgentTaskKnowledge.Core.Tests/AgentTaskKnowledge.Core.Tests.csproj" />
+    <Project Path="tests/Cdp.PackageIntelligence.Tests/Cdp.PackageIntelligence.Tests.csproj" />
     <Project Path="tests/Cdp.Core.Tests/Cdp.Core.Tests.csproj" />
     <Project Path="tests/Cdp.Evidence.Tests/Cdp.Evidence.Tests.csproj" />
     <Project Path="tests/Cdp.Ignite.Client.Tests/Cdp.Ignite.Client.Tests.csproj" />
