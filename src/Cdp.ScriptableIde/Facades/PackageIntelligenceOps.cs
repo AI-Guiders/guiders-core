@@ -130,6 +130,8 @@ public static class PackageIntelligenceOps
                 projection = "nuget",
                 anchor = result.AnchorPath,
                 has_vulnerabilities = result.HasVulnerabilities,
+                strategy = result.Strategy,
+                apply_command = result.ApplyCommand,
                 note = result.Note,
                 actions = result.Actions.Select(a => new
                 {
@@ -143,6 +145,49 @@ public static class PackageIntelligenceOps
                 })
             });
             bus.RecordLocal("packages", kind, ScriptArgs.From(new { anchor, includeTransitive, includePrerelease }), step.ToJson());
+            return step;
+        }
+        catch (Exception ex)
+        {
+            return FailRecord(bus, kind, ex.Message, anchor);
+        }
+    }
+
+    public static async Task<StepResponse> FixVulnAsync(
+        ScriptToolBus bus,
+        PlanContext plan,
+        string? projectPath = null,
+        CancellationToken ct = default)
+    {
+        const string kind = "packages.fix_vuln";
+        if (!TryResolveCsharpAnchor(plan, projectPath, out var anchor, out var err))
+            return FailRecord(bus, kind, err);
+
+        if (bus.IsDryRun)
+        {
+            var cmd = SdkVulnerabilityUpdater.FormatApplyCommand(anchor);
+            var dry = StepResponse.Success(kind, "dry_run", new { dry_run = true, anchor, apply_command = cmd });
+            bus.RecordLocal("packages", kind, ScriptArgs.From(new { anchor }), dry.ToJson(), skippedDryRun: true);
+            return dry;
+        }
+
+        try
+        {
+            var result = await Planner.ApplyVulnerabilityFixesAsync(anchor, ct).ConfigureAwait(false);
+            var payload = new
+            {
+                projection = "nuget",
+                anchor = result.AnchorPath,
+                strategy = "sdk_dotnet_package_update_vulnerable",
+                apply_command = SdkVulnerabilityUpdater.FormatApplyCommand(anchor),
+                exit_code = result.ExitCode,
+                stdout = Trunc(result.StdOut, 6000),
+                stderr = Trunc(result.StdErr, 2000)
+            };
+            var step = result.Ok
+                ? StepResponse.Success(kind, "applied", payload)
+                : StepResponse.Fail(kind, $"dotnet exit {result.ExitCode}", payload);
+            bus.RecordLocal("packages", kind, ScriptArgs.From(new { anchor }), step.ToJson());
             return step;
         }
         catch (Exception ex)
@@ -244,6 +289,13 @@ public static class PackageIntelligenceOps
 
         error = $"Unsupported anchor for package intelligence: {path}";
         return false;
+    }
+
+    private static string? Trunc(string? s, int max)
+    {
+        if (string.IsNullOrEmpty(s))
+            return s;
+        return s.Length <= max ? s : s[..max] + "…";
     }
 
     private static StepResponse FailRecord(ScriptToolBus bus, string kind, string error, object? extra = null)

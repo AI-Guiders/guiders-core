@@ -7,7 +7,7 @@
     <RootNamespace>Cdp.PackageIntelligence</RootNamespace>
     <AssemblyName>Cdp.PackageIntelligence</AssemblyName>
     <PackageId>AIGuiders.Cdp.PackageIntelligence</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>In-proc NuGet package intelligence for CDP: vulnerability audit, latest version lookup, upgrade planning, supply-chain review. L1 over PackageOps L0 mutate.</Description>

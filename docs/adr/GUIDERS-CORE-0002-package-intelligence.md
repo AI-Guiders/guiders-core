@@ -23,8 +23,8 @@ Three layers:
 1. New library **`AIGuiders.Cdp.PackageIntelligence`** under `guiders-core/src/Cdp.PackageIntelligence/`.
 2. Use **NuGet client libraries** (`NuGet.Protocol`, `NuGet.Configuration`, `NuGet.Versioning`) — same MIT stack as NuGet/Home, not a `<PackageReference>` to `NuGet.Mcp.Server`.
 3. Vulnerability discovery: `dotnet list package --vulnerable --format json` (SDK 10) + structured parse.
-4. Upgrade planning (v1): map each vulnerable package → latest stable on configured feed via `FindPackageByIdResource`; emit agent-actionable plan (LLM applies csproj edits). **Graph solver** (`NuGet.Solver.Core`) deferred until published on nuget.org or vendored with upstream attribution.
-5. New habitat tools: `cdp_pkg_audit`, `cdp_pkg_latest`, `cdp_pkg_upgrade_plan`, `cdp_pkg_supply_chain`.
+4. Upgrade planning: audit + optional feed hints; **apply** via SDK `dotnet package update --vulnerable` (`cdp_pkg_fix_vuln`). Microsoft `NuGet.Solver.Core` is not a consumable package — do not wait for it.
+5. New habitat tools: `cdp_pkg_audit`, `cdp_pkg_latest`, `cdp_pkg_upgrade_plan`, `cdp_pkg_fix_vuln`, `cdp_pkg_supply_chain`.
 6. Cursor `user-nuget` MCP stays complementary for IDE agents; habitat gets in-proc parity.
 
 ### Boundaries
@@ -36,7 +36,7 @@ Three layers:
 
 - `Cdp.ScriptableIde` references `Cdp.PackageIntelligence` and exposes `PackageIntelligenceOps`.
 - `cdp-mcp` wires new Meta tools + Citizen `@intent pkg audit|latest|upgrade_plan|supply_chain`.
-- Future: adopt `NuGet.Solver.Core` when available as a package; optional upstream contribution to NuGet/Home.
+- Future: if Microsoft publishes `NuGet.Solver.Core` on nuget.org, evaluate for richer graph planning; SDK path remains default apply.
 
 ## Attribution
 

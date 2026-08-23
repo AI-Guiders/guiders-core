@@ -38,7 +38,9 @@ public sealed record UpgradePlanResult(
     string AnchorPath,
     bool HasVulnerabilities,
     IReadOnlyList<UpgradeAction> Actions,
-    string Note);
+    string Note,
+    string Strategy = "sdk_dotnet_package_update_vulnerable",
+    string? ApplyCommand = null);
 
 public sealed record PackageSourceInfo(string Name, string Source, bool IsEnabled);
 
