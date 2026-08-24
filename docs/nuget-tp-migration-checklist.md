@@ -37,4 +37,10 @@
 |-------|------------|----------|
 | `AI-Guiders` | `guiders-platform` | `release.yml` |
 
-Отдельная политика, не конфликтует с Core.
+## UI platform (добавить)
+
+| Owner | Repository | Workflow | Пакет(ы) |
+|-------|------------|----------|----------|
+| `AI-Guiders` | `guiders-ui-platform` | `release.yml` | `AIGuiders.UI.*` |
+
+Отдельная политика, не конфликтует с Core / Platform.
