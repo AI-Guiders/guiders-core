@@ -21,5 +21,6 @@
 | `src/HybridCodebaseIndex.Core` | `AIGuiders.HybridCodebaseIndex.Core` | hybrid-codebase-index-core |
 | `src/TerminalMcp.Core` | `AIGuiders.TerminalMcp.Core` | terminal-mcp-core |
 | `src/TypescriptLang.Core` | `AIGuiders.TypescriptLang.Core` | typescript-lang |
+| `src/TypescriptLang.Core/worker` | (Node companion, not a NuGet) | typescript-lang/worker |
 
 **Not in Core** (stay product/sibling repos): `ai-native-ui` (Anui.*), MCP host exes, smoke tools under old `cdp-scriptable-ide/tools`.

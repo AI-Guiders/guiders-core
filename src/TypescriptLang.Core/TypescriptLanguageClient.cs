@@ -187,8 +187,8 @@ public sealed class TypescriptLanguageClient : IAsyncDisposable
         if (Directory.Exists(besideExe))
             return besideExe;
 
-        // Dev: repo layout typescript-lang/worker next to TypescriptLang.Core
-        var probe = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "worker"));
+        // Dev: worker next to TypescriptLang.Core (guiders-core monorepo home).
+        var probe = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "worker"));
         if (Directory.Exists(probe) && File.Exists(Path.Combine(probe, "index.mjs")))
             return probe;
 
