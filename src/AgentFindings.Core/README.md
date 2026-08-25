@@ -21,4 +21,4 @@ Override relative dir: env `AGENT_FINDINGS_DIR` (single relative name only).
 
 ## License
 
-[Hippocratic License 2.1](LICENSE) (Ethical Source / SPDX `Hippocratic-2.1`)
+[MIT](LICENSE) · [Ethical use](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
