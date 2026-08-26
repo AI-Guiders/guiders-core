@@ -3,36 +3,35 @@ namespace Cdp.ScriptableIde;
 /// <summary>Resolve writing canon stack (CDP-ADR-0207) from embedded defaults + disk project.toml.</summary>
 public static class WritingCanonStackResolver
 {
-    private const string EnvAgentNotesFile = "AGENT_NOTES_FILE";
-    private const string EnvGuidersStyleRoot = "GUIDERS_STYLE_ROOT";
-    private const string EnvOperatorWritingPrefs = "OPERATOR_WRITING_PREFS_PATH";
-
-    public static WritingCanonStackResult Build(string scmRoot)
+    public static WritingCanonStackResult Build(string scmRoot, WritingCanonHostPaths? host = null)
     {
+        host ??= new WritingCanonHostPaths();
         var root = Path.GetFullPath(scmRoot.Trim());
         var (settings, settingsPath, settingsSource) = ProjectCanonSettingsLoader.LoadEffective(root);
         var operatorEntries = new List<WritingCanonStackEntry>();
         var codeEntries = new List<WritingCanonStackEntry>();
 
-        var personalPath = ResolveOperatorPrefsPath(settings);
+        var (personalPath, personalSource) = ResolveOperatorPrefsPath(settings, host);
         operatorEntries.Add(BuildEntry(
             "personal",
             WritingCanonPlane.Operator,
             personalPath,
             settings.BudgetPersonal,
             settings.PreviewLines,
-            "primary-canon"));
+            personalSource));
 
         if (!string.IsNullOrWhiteSpace(settings.Lang))
         {
-            var orgLangPath = ResolveOrgLangPath(settings);
+            var (orgLangPath, orgSource) = ResolveOrgLangPath(settings, host);
+            if (settings.OrgStyle is not null)
+                orgSource = $"{orgSource};org_style={settings.OrgStyle}";
             codeEntries.Add(BuildEntry(
                 "org-lang",
                 WritingCanonPlane.Code,
                 orgLangPath,
                 settings.BudgetOrgLang,
                 settings.PreviewLines,
-                settings.OrgStyle is not null ? $"org_style={settings.OrgStyle}" : "embedded"));
+                orgSource));
         }
 
         var projectCanonPath = ResolveProjectCanonPath(root, settings);
@@ -74,56 +73,42 @@ public static class WritingCanonStackResolver
     private static string ResolveProjectCanonPath(string scmRoot, ProjectCanonSettings settings) =>
         Path.Combine(scmRoot, ProjectSettingsPaths.RelDir, settings.CanonFile);
 
-    private static string ResolveOrgLangPath(ProjectCanonSettings settings)
+    private static (string Path, string Source) ResolveOrgLangPath(
+        ProjectCanonSettings settings,
+        WritingCanonHostPaths host)
     {
         var lang = settings.Lang!.Trim();
         var file = settings.OrgLangFile.Trim();
-        var styleRoot = ResolveOrgStyleRoot(settings);
+        var (styleRoot, source) = ResolveOrgStyleRoot(settings, host);
         if (string.IsNullOrWhiteSpace(styleRoot))
-            return Path.Combine("(unset)", lang, file);
-        return Path.Combine(styleRoot, lang, file);
+            return (Path.Combine("(unset)", lang, file), "unset");
+        return (Path.Combine(styleRoot, lang, file), source);
     }
 
-    private static string? ResolveOrgStyleRoot(ProjectCanonSettings settings)
+    private static (string? Root, string Source) ResolveOrgStyleRoot(
+        ProjectCanonSettings settings,
+        WritingCanonHostPaths host)
     {
         if (!string.IsNullOrWhiteSpace(settings.OrgStyleRoot))
-            return Path.GetFullPath(settings.OrgStyleRoot.Trim());
+            return (Path.GetFullPath(settings.OrgStyleRoot.Trim()), "project.toml");
 
-        var env = Environment.GetEnvironmentVariable(EnvGuidersStyleRoot);
-        if (!string.IsNullOrWhiteSpace(env))
-            return Path.GetFullPath(env.Trim());
+        if (!string.IsNullOrWhiteSpace(host.GuidersStyleRoot))
+            return (Path.GetFullPath(host.GuidersStyleRoot.Trim()), "cdp-mcp.toml");
 
-        return null;
+        return (null, "unset");
     }
 
-    private static string ResolveOperatorPrefsPath(ProjectCanonSettings settings)
+    private static (string Path, string Source) ResolveOperatorPrefsPath(
+        ProjectCanonSettings settings,
+        WritingCanonHostPaths host)
     {
-        var overridePath = Environment.GetEnvironmentVariable(EnvOperatorWritingPrefs);
-        if (!string.IsNullOrWhiteSpace(overridePath))
-            return Path.GetFullPath(overridePath.Trim());
+        var rel = settings.OperatorPrefsRelpath.Replace('/', Path.DirectorySeparatorChar);
+        if (!string.IsNullOrWhiteSpace(host.PrimaryKnowledgeRoot))
+            return (
+                Path.Combine(host.PrimaryKnowledgeRoot.Trim(), rel),
+                "agent-notes-mcp.toml+embedded");
 
-        var knowledgeRoot = TryInferKnowledgeRootFromAgentNotes();
-        if (knowledgeRoot is not null)
-            return Path.Combine(knowledgeRoot, settings.OperatorPrefsRelpath.Replace('/', Path.DirectorySeparatorChar));
-
-        return settings.OperatorPrefsRelpath;
-    }
-
-    private static string? TryInferKnowledgeRootFromAgentNotes()
-    {
-        var notesFile = Environment.GetEnvironmentVariable(EnvAgentNotesFile);
-        if (string.IsNullOrWhiteSpace(notesFile))
-            return null;
-
-        var current = Path.GetDirectoryName(Path.GetFullPath(notesFile.Trim()));
-        while (!string.IsNullOrEmpty(current))
-        {
-            if (Directory.Exists(Path.Combine(current, "knowledge")))
-                return current;
-            current = Directory.GetParent(current)?.FullName;
-        }
-
-        return null;
+        return (rel, "embedded-only");
     }
 
     private static string ReadPreview(string path, int maxLines)

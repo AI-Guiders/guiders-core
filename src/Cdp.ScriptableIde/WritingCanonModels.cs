@@ -22,6 +22,16 @@ public sealed record WritingCanonStackResult(
     IReadOnlyList<WritingCanonStackEntry> Operator,
     IReadOnlyList<WritingCanonStackEntry> Code);
 
+/// <summary>Host-level paths from CDP / Agent Notes TOML (not env).</summary>
+public sealed class WritingCanonHostPaths
+{
+    /// <summary><c>[knowledge].primary</c> via <c>memory.notes_config</c> → agent-notes-mcp.toml.</summary>
+    public string? PrimaryKnowledgeRoot { get; init; }
+
+    /// <summary><c>[canon].guiders_style_root</c> in cdp-mcp.toml (project <c>org_style_root</c> wins).</summary>
+    public string? GuidersStyleRoot { get; init; }
+}
+
 public sealed class ProjectCanonSettings
 {
     public string? Lang { get; init; }
