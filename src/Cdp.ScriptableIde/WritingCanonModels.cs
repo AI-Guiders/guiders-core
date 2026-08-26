@@ -19,6 +19,8 @@ public sealed record WritingCanonStackResult(
     string ScmRoot,
     string SettingsPath,
     string SettingsSource,
+    string? EffectiveLang,
+    string LangSource,
     IReadOnlyList<WritingCanonStackEntry> Operator,
     IReadOnlyList<WritingCanonStackEntry> Code);
 
@@ -30,6 +32,12 @@ public sealed class WritingCanonHostPaths
 
     /// <summary><c>[canon].guiders_style_root</c> in cdp-mcp.toml (project <c>org_style_root</c> wins).</summary>
     public string? GuidersStyleRoot { get; init; }
+
+    /// <summary>CDP session language after <c>cdp_open</c> (project detect).</summary>
+    public string? SessionLanguage { get; init; }
+
+    /// <summary>Language inferred from open buffer paths (MRU scan).</summary>
+    public string? BufferLanguage { get; init; }
 }
 
 public sealed class ProjectCanonSettings

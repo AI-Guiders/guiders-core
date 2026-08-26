@@ -20,9 +20,11 @@ public static class WritingCanonStackResolver
             settings.PreviewLines,
             personalSource));
 
-        if (!string.IsNullOrWhiteSpace(settings.Lang))
+        var (effectiveLang, langSource) = ResolveEffectiveLang(settings, host);
+
+        if (!string.IsNullOrWhiteSpace(effectiveLang))
         {
-            var (orgLangPath, orgSource) = ResolveOrgLangPath(settings, host);
+            var (orgLangPath, orgSource) = ResolveOrgLangPath(effectiveLang, settings, host);
             if (settings.OrgStyle is not null)
                 orgSource = $"{orgSource};org_style={settings.OrgStyle}";
             codeEntries.Add(BuildEntry(
@@ -47,9 +49,32 @@ public static class WritingCanonStackResolver
             root,
             settingsPath,
             settingsSource,
+            effectiveLang,
+            langSource,
             operatorEntries,
             codeEntries);
     }
+
+    private static (string? Lang, string Source) ResolveEffectiveLang(
+        ProjectCanonSettings settings,
+        WritingCanonHostPaths host)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Lang))
+            return (settings.Lang.Trim(), "project.toml");
+
+        if (!string.IsNullOrWhiteSpace(host.SessionLanguage)
+            && IsCodeLanguage(host.SessionLanguage))
+            return (host.SessionLanguage.Trim(), "session");
+
+        if (!string.IsNullOrWhiteSpace(host.BufferLanguage)
+            && IsCodeLanguage(host.BufferLanguage))
+            return (host.BufferLanguage.Trim(), "buffer");
+
+        return (null, "unset");
+    }
+
+    private static bool IsCodeLanguage(string language) =>
+        language.Trim().ToLowerInvariant() is "csharp" or "typescript" or "python" or "powershell" or "delphi";
 
     private static WritingCanonStackEntry BuildEntry(
         string layer,
@@ -74,15 +99,15 @@ public static class WritingCanonStackResolver
         Path.Combine(scmRoot, ProjectSettingsPaths.RelDir, settings.CanonFile);
 
     private static (string Path, string Source) ResolveOrgLangPath(
+        string lang,
         ProjectCanonSettings settings,
         WritingCanonHostPaths host)
     {
-        var lang = settings.Lang!.Trim();
         var file = settings.OrgLangFile.Trim();
         var (styleRoot, source) = ResolveOrgStyleRoot(settings, host);
         if (string.IsNullOrWhiteSpace(styleRoot))
             return (Path.Combine("(unset)", lang, file), "unset");
-        return (Path.Combine(styleRoot, lang, file), source);
+        return (Path.Combine(styleRoot, lang.Trim(), file), source);
     }
 
     private static (string? Root, string Source) ResolveOrgStyleRoot(
