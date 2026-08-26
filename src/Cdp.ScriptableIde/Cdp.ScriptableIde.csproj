@@ -18,7 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.3.0" />
-    <PackageReference Include="Tomlyn" Version="2.9.0" />
+    <PackageReference Include="Tomlyn" Version="2.10.1" />
     <ProjectReference Include="..\Cdp.Evidence\Cdp.Evidence.csproj"
                       Condition="Exists('..\Cdp.Evidence\Cdp.Evidence.csproj')" />
     <ProjectReference Include="..\Cdp.PackageIntelligence\Cdp.PackageIntelligence.csproj"

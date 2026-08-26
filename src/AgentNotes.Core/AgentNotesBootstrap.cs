@@ -1,3 +1,5 @@
+using AIGuiders.Cli;
+
 namespace AgentNotes.Core;
 
 /// <summary>CLI / env resolution for MCP 2.0 local TOML.</summary>
@@ -20,26 +22,8 @@ public static class AgentNotesBootstrap
     public static string[] FilterStatusOnlyArgs(string[] args) =>
         args.Where(static a => a is not "--status-only" and not "--status_only").ToArray();
 
-    public static string? ResolveConfigPath(string[] args)
-    {
-        for (var i = 0; i < args.Length; i++)
-        {
-            var arg = args[i];
-            if (arg is "--config" or "--config-file")
-            {
-                if (i + 1 >= args.Length)
-                    throw new ArgumentException($"Missing path after {arg}.");
-                return args[i + 1].Trim();
-            }
-
-            const string prefix = "--config=";
-            if (arg.StartsWith(prefix, StringComparison.Ordinal))
-                return arg[prefix.Length..].Trim();
-        }
-
-        var fromEnv = Environment.GetEnvironmentVariable(ConfigEnvVar);
-        return string.IsNullOrWhiteSpace(fromEnv) ? null : fromEnv.Trim();
-    }
+    public static string? ResolveConfigPath(string[] args) =>
+        ConfigPathResolver.TryResolve(args, ConfigEnvVar);
 
     /// <summary>Load settings for MCP host startup. Returns exit code 0 on success.</summary>
     public static int TryLoadSettings(string[] args, out LocalSettings? settings, out string? errorMessage)
