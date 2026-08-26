@@ -48,8 +48,12 @@ public sealed class ProjectCanonSettings
     public string CanonFile { get; init; } = "canon.md";
     public int PreviewLines { get; init; } = 12;
     public int BudgetPersonal { get; init; } = 500;
+    public int BudgetOrgCore { get; init; } = 600;
     public int BudgetOrgLang { get; init; } = 800;
+    public int BudgetOrgLangDesign { get; init; } = 600;
     public int BudgetProject { get; init; } = 1500;
     public string OperatorPrefsRelpath { get; init; } = "knowledge/personal/operator-writing-prefs.md";
+    public string OrgCoreFile { get; init; } = "principles.md";
     public string OrgLangFile { get; init; } = "writing-surface.md";
+    public string OrgLangDesignFile { get; init; } = "design-patterns.md";
 }

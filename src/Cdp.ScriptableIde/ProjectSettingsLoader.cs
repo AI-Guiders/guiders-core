@@ -93,12 +93,20 @@ public static class ProjectSettingsLoader
                 settings.CanonBudgetPersonal = canon.BudgetPersonal.Value;
             if (canon.BudgetOrgLang is > 0)
                 settings.CanonBudgetOrgLang = canon.BudgetOrgLang.Value;
+            if (canon.BudgetOrgCore is > 0)
+                settings.CanonBudgetOrgCore = canon.BudgetOrgCore.Value;
+            if (canon.BudgetOrgLangDesign is > 0)
+                settings.CanonBudgetOrgLangDesign = canon.BudgetOrgLangDesign.Value;
             if (canon.BudgetProject is > 0)
                 settings.CanonBudgetProject = canon.BudgetProject.Value;
             if (!string.IsNullOrWhiteSpace(canon.OperatorPrefsRelpath))
                 settings.OperatorPrefsRelpath = canon.OperatorPrefsRelpath;
+            if (!string.IsNullOrWhiteSpace(canon.OrgCoreFile))
+                settings.OrgCoreFile = canon.OrgCoreFile;
             if (!string.IsNullOrWhiteSpace(canon.OrgLangFile))
                 settings.OrgLangFile = canon.OrgLangFile;
+            if (!string.IsNullOrWhiteSpace(canon.OrgLangDesignFile))
+                settings.OrgLangDesignFile = canon.OrgLangDesignFile;
         }
     }
 

@@ -34,13 +34,21 @@ public sealed class ProjectSettings
 
     public int CanonBudgetPersonal { get; set; } = 500;
 
+    public int CanonBudgetOrgCore { get; set; } = 600;
+
     public int CanonBudgetOrgLang { get; set; } = 800;
+
+    public int CanonBudgetOrgLangDesign { get; set; } = 600;
 
     public int CanonBudgetProject { get; set; } = 1500;
 
     public string OperatorPrefsRelpath { get; set; } = "knowledge/personal/operator-writing-prefs.md";
 
+    public string OrgCoreFile { get; set; } = "principles.md";
+
     public string OrgLangFile { get; set; } = "writing-surface.md";
+
+    public string OrgLangDesignFile { get; set; } = "design-patterns.md";
 
     public string SettingsPath { get; set; } = "";
 }

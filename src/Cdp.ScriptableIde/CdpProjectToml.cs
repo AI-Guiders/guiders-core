@@ -93,10 +93,14 @@ internal static class CdpProjectToml
                 CanonFile = o.CanonFile ?? d.CanonFile,
                 PreviewLines = o.PreviewLines ?? d.PreviewLines,
                 BudgetPersonal = o.BudgetPersonal ?? d.BudgetPersonal,
+                BudgetOrgCore = o.BudgetOrgCore ?? d.BudgetOrgCore,
                 BudgetOrgLang = o.BudgetOrgLang ?? d.BudgetOrgLang,
+                BudgetOrgLangDesign = o.BudgetOrgLangDesign ?? d.BudgetOrgLangDesign,
                 BudgetProject = o.BudgetProject ?? d.BudgetProject,
                 OperatorPrefsRelpath = o.OperatorPrefsRelpath ?? d.OperatorPrefsRelpath,
+                OrgCoreFile = o.OrgCoreFile ?? d.OrgCoreFile,
                 OrgLangFile = o.OrgLangFile ?? d.OrgLangFile,
+                OrgLangDesignFile = o.OrgLangDesignFile ?? d.OrgLangDesignFile,
             };
         }
     }
@@ -125,9 +129,13 @@ internal static class CdpProjectToml
         public string? CanonFile { get; set; }
         public int? PreviewLines { get; set; }
         public int? BudgetPersonal { get; set; }
+        public int? BudgetOrgCore { get; set; }
         public int? BudgetOrgLang { get; set; }
+        public int? BudgetOrgLangDesign { get; set; }
         public int? BudgetProject { get; set; }
         public string? OperatorPrefsRelpath { get; set; }
+        public string? OrgCoreFile { get; set; }
         public string? OrgLangFile { get; set; }
+        public string? OrgLangDesignFile { get; set; }
     }
 }

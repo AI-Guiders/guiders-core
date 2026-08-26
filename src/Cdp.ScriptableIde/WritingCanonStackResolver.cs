@@ -22,18 +22,38 @@ public static class WritingCanonStackResolver
 
         var (effectiveLang, langSource) = ResolveEffectiveLang(settings, host);
 
+        var (styleRoot, styleSource) = ResolveOrgStyleRoot(settings, host);
+        if (settings.OrgStyle is not null)
+            styleSource = $"{styleSource};org_style={settings.OrgStyle}";
+
+        var orgCorePath = ResolveOrgCorePath(settings, styleRoot);
+        codeEntries.Add(BuildEntry(
+            "org-core",
+            WritingCanonPlane.Code,
+            orgCorePath,
+            settings.BudgetOrgCore,
+            settings.PreviewLines,
+            styleSource));
+
         if (!string.IsNullOrWhiteSpace(effectiveLang))
         {
-            var (orgLangPath, orgSource) = ResolveOrgLangPath(effectiveLang, settings, host);
-            if (settings.OrgStyle is not null)
-                orgSource = $"{orgSource};org_style={settings.OrgStyle}";
+            var orgLangPath = ResolveOrgLangPath(effectiveLang, settings, styleRoot);
             codeEntries.Add(BuildEntry(
                 "org-lang",
                 WritingCanonPlane.Code,
                 orgLangPath,
                 settings.BudgetOrgLang,
                 settings.PreviewLines,
-                orgSource));
+                styleSource));
+
+            var orgDesignPath = ResolveOrgLangDesignPath(effectiveLang, settings, styleRoot);
+            codeEntries.Add(BuildEntry(
+                "org-lang-design",
+                WritingCanonPlane.Code,
+                orgDesignPath,
+                settings.BudgetOrgLangDesign,
+                settings.PreviewLines,
+                styleSource));
         }
 
         var projectCanonPath = ResolveProjectCanonPath(root, settings);
@@ -98,16 +118,34 @@ public static class WritingCanonStackResolver
     private static string ResolveProjectCanonPath(string scmRoot, ProjectCanonSettings settings) =>
         Path.Combine(scmRoot, ProjectSettingsPaths.RelDir, settings.CanonFile);
 
-    private static (string Path, string Source) ResolveOrgLangPath(
+    private static string ResolveOrgCorePath(ProjectCanonSettings settings, string? styleRoot)
+    {
+        var file = settings.OrgCoreFile.Trim();
+        if (string.IsNullOrWhiteSpace(styleRoot))
+            return Path.Combine("(unset)", "core", file);
+        return Path.Combine(styleRoot, "core", file);
+    }
+
+    private static string ResolveOrgLangPath(
         string lang,
         ProjectCanonSettings settings,
-        WritingCanonHostPaths host)
+        string? styleRoot)
     {
         var file = settings.OrgLangFile.Trim();
-        var (styleRoot, source) = ResolveOrgStyleRoot(settings, host);
         if (string.IsNullOrWhiteSpace(styleRoot))
-            return (Path.Combine("(unset)", lang, file), "unset");
-        return (Path.Combine(styleRoot, lang.Trim(), file), source);
+            return Path.Combine("(unset)", lang, file);
+        return Path.Combine(styleRoot, lang.Trim(), file);
+    }
+
+    private static string ResolveOrgLangDesignPath(
+        string lang,
+        ProjectCanonSettings settings,
+        string? styleRoot)
+    {
+        var file = settings.OrgLangDesignFile.Trim();
+        if (string.IsNullOrWhiteSpace(styleRoot))
+            return Path.Combine("(unset)", lang, file);
+        return Path.Combine(styleRoot, lang.Trim(), file);
     }
 
     private static (string? Root, string Source) ResolveOrgStyleRoot(
@@ -171,9 +209,13 @@ internal static class ProjectCanonSettingsLoader
             CanonFile = canon?.CanonFile ?? "canon.md",
             PreviewLines = canon?.PreviewLines ?? 12,
             BudgetPersonal = canon?.BudgetPersonal ?? 500,
+            BudgetOrgCore = canon?.BudgetOrgCore ?? 600,
             BudgetOrgLang = canon?.BudgetOrgLang ?? 800,
+            BudgetOrgLangDesign = canon?.BudgetOrgLangDesign ?? 600,
             BudgetProject = canon?.BudgetProject ?? 1500,
             OperatorPrefsRelpath = canon?.OperatorPrefsRelpath ?? "knowledge/personal/operator-writing-prefs.md",
+            OrgCoreFile = canon?.OrgCoreFile ?? "principles.md",
             OrgLangFile = canon?.OrgLangFile ?? "writing-surface.md",
+            OrgLangDesignFile = canon?.OrgLangDesignFile ?? "design-patterns.md",
         };
 }
