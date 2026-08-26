@@ -20,6 +20,28 @@ public sealed class ProjectSettings
     /// <summary>Placeholder — roslyn cleanup / format profile later.</summary>
     public string? FormatProfile { get; set; }
 
+    public string? SettingsSource { get; set; }
+
+    public string? CanonLang { get; set; }
+
+    public string? OrgStyle { get; set; }
+
+    public string? OrgStyleRoot { get; set; }
+
+    public string CanonFile { get; set; } = "canon.md";
+
+    public int CanonPreviewLines { get; set; } = 12;
+
+    public int CanonBudgetPersonal { get; set; } = 500;
+
+    public int CanonBudgetOrgLang { get; set; } = 800;
+
+    public int CanonBudgetProject { get; set; } = 1500;
+
+    public string OperatorPrefsRelpath { get; set; } = "knowledge/personal/operator-writing-prefs.md";
+
+    public string OrgLangFile { get; set; } = "writing-surface.md";
+
     public string SettingsPath { get; set; } = "";
 }
 

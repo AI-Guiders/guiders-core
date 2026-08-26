@@ -1,0 +1,11 @@
+# Embedded defaults (Cdp.ScriptableIde) — overlay with {work_root}/.cdp/project.toml
+version = 1
+
+[canon]
+canon_file = "canon.md"
+preview_lines = 12
+budget_personal = 500
+budget_org_lang = 800
+budget_project = 1500
+operator_prefs_relpath = "knowledge/personal/operator-writing-prefs.md"
+org_lang_file = "writing-surface.md"

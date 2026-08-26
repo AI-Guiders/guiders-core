@@ -3,19 +3,16 @@ using Tomlyn;
 
 namespace Cdp.ScriptableIde;
 
-/// <summary>Load/save <see cref="ProjectSettings"/>; language-dependent Detect fills gaps.</summary>
+/// <summary>Load/save <see cref="ProjectSettings"/>; defaults from embedded TOML + disk overlay.</summary>
 public static class ProjectSettingsLoader
 {
-    private static readonly TomlSerializerOptions TomlOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    };
+    private static readonly TomlSerializerOptions TomlOpts = CdpProjectToml.Options;
 
-    /// <summary>Read file (if any) then Detect-fill unset test FW.</summary>
+    /// <summary>Read embedded defaults + disk overlay (if any) then Detect-fill unset test FW.</summary>
     public static void Hydrate(PlanContext plan)
     {
         plan.Settings.SettingsPath = ProjectSettingsPaths.ResolveFile(plan.WorkRoot);
-        TryReadFile(plan.Settings);
+        ApplyMergedToml(plan.Settings, plan.WorkRoot);
         FillDetect(plan);
     }
 
@@ -42,37 +39,66 @@ public static class ProjectSettingsLoader
 
     public static void TryReadFile(ProjectSettings settings)
     {
-        var path = settings.SettingsPath;
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        if (string.IsNullOrWhiteSpace(settings.SettingsPath))
             return;
+        ApplyMergedToml(settings, ResolveWorkRootFromSettingsPath(settings.SettingsPath));
+    }
 
-        try
+    internal static string ResolveWorkRootFromSettingsPath(string settingsPath)
+    {
+        var dir = Path.GetDirectoryName(Path.GetFullPath(settingsPath)) ?? settingsPath;
+        if (string.Equals(Path.GetFileName(dir), ProjectSettingsPaths.RelDir, StringComparison.OrdinalIgnoreCase))
+            return Path.GetDirectoryName(dir) ?? dir;
+        return dir;
+    }
+
+    private static void ApplyMergedToml(ProjectSettings settings, string workRoot)
+    {
+        var embedded = CdpProjectToml.DeserializeEmbedded();
+        var disk = CdpProjectToml.TryDeserializeFile(ProjectSettingsPaths.ResolveFile(workRoot));
+        var doc = CdpProjectToml.Merge(embedded, disk);
+        settings.SettingsSource = disk is null ? "embedded" : "embedded+disk";
+
+        if (doc.Test is { } test)
         {
-            var doc = TomlSerializer.Deserialize<ProjectTomlDocument>(File.ReadAllText(path), TomlOpts);
-            if (doc?.Test is { } test)
+            if (!string.IsNullOrWhiteSpace(test.Policy)
+                && Enum.TryParse<TestFrameworkPolicy>(test.Policy, ignoreCase: true, out var policy))
+                settings.TestFrameworkPolicy = policy;
+
+            if (!string.IsNullOrWhiteSpace(test.Framework)
+                && TryParseFramework(test.Framework, out var kind))
             {
-                if (!string.IsNullOrWhiteSpace(test.Policy)
-                    && Enum.TryParse<TestFrameworkPolicy>(test.Policy, ignoreCase: true, out var policy))
-                    settings.TestFrameworkPolicy = policy;
-
-                if (!string.IsNullOrWhiteSpace(test.Framework)
-                    && TryParseFramework(test.Framework, out var kind))
-                {
-                    settings.TestFramework = kind;
-                    settings.TestFrameworkPolicy = TestFrameworkPolicy.Specified;
-                    settings.TestFrameworkSource = "file";
-                }
+                settings.TestFramework = kind;
+                settings.TestFrameworkPolicy = TestFrameworkPolicy.Specified;
+                settings.TestFrameworkSource = "file";
             }
-
-            if (!string.IsNullOrWhiteSpace(doc?.Docs?.Style))
-                settings.DocstringStyle = doc.Docs.Style;
-
-            if (!string.IsNullOrWhiteSpace(doc?.Format?.Profile))
-                settings.FormatProfile = doc.Format.Profile;
         }
-        catch
+
+        if (!string.IsNullOrWhiteSpace(doc.Docs?.Style))
+            settings.DocstringStyle = doc.Docs.Style;
+
+        if (!string.IsNullOrWhiteSpace(doc.Format?.Profile))
+            settings.FormatProfile = doc.Format.Profile;
+
+        if (doc.Canon is { } canon)
         {
-            // corrupt file — leave defaults
+            settings.CanonLang = canon.Lang;
+            settings.OrgStyle = canon.OrgStyle;
+            settings.OrgStyleRoot = canon.OrgStyleRoot;
+            if (!string.IsNullOrWhiteSpace(canon.CanonFile))
+                settings.CanonFile = canon.CanonFile;
+            if (canon.PreviewLines is > 0)
+                settings.CanonPreviewLines = canon.PreviewLines.Value;
+            if (canon.BudgetPersonal is > 0)
+                settings.CanonBudgetPersonal = canon.BudgetPersonal.Value;
+            if (canon.BudgetOrgLang is > 0)
+                settings.CanonBudgetOrgLang = canon.BudgetOrgLang.Value;
+            if (canon.BudgetProject is > 0)
+                settings.CanonBudgetProject = canon.BudgetProject.Value;
+            if (!string.IsNullOrWhiteSpace(canon.OperatorPrefsRelpath))
+                settings.OperatorPrefsRelpath = canon.OperatorPrefsRelpath;
+            if (!string.IsNullOrWhiteSpace(canon.OrgLangFile))
+                settings.OrgLangFile = canon.OrgLangFile;
         }
     }
 
@@ -89,11 +115,9 @@ public static class ProjectSettingsLoader
 
         var fw = plan.Settings.TestFramework?.ToString().ToLowerInvariant() ?? "";
         var policy = plan.Settings.TestFrameworkPolicy.ToString();
-        var doc = plan.Settings.DocstringStyle ?? "";
-        var profile = plan.Settings.FormatProfile ?? "";
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("# CDP project settings (harness-owned conventions)");
+        sb.AppendLine("# CDP project settings (embedded defaults + disk overlay)");
         sb.AppendLine();
         sb.AppendLine("[test]");
         if (plan.Settings.TestFramework is not null
@@ -102,16 +126,26 @@ public static class ProjectSettingsLoader
         sb.AppendLine($"policy = \"{TomlEscape(policy)}\"");
         sb.AppendLine();
         sb.AppendLine("[docs]");
-        if (!string.IsNullOrWhiteSpace(doc))
-            sb.AppendLine($"style = \"{TomlEscape(doc)}\"");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.DocstringStyle))
+            sb.AppendLine($"style = \"{TomlEscape(plan.Settings.DocstringStyle)}\"");
         else
-            sb.AppendLine("# style = \"google\"  # python docstring etc.");
+            sb.AppendLine("# style = \"google\"");
         sb.AppendLine();
         sb.AppendLine("[format]");
-        if (!string.IsNullOrWhiteSpace(profile))
-            sb.AppendLine($"profile = \"{TomlEscape(profile)}\"");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.FormatProfile))
+            sb.AppendLine($"profile = \"{TomlEscape(plan.Settings.FormatProfile)}\"");
         else
             sb.AppendLine("# profile = \"default\"");
+        sb.AppendLine();
+        sb.AppendLine("[canon]");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.CanonLang))
+            sb.AppendLine($"lang = \"{TomlEscape(plan.Settings.CanonLang)}\"");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.OrgStyle))
+            sb.AppendLine($"org_style = \"{TomlEscape(plan.Settings.OrgStyle)}\"");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.OrgStyleRoot))
+            sb.AppendLine($"org_style_root = \"{TomlEscape(plan.Settings.OrgStyleRoot)}\"");
+        if (!string.IsNullOrWhiteSpace(plan.Settings.CanonFile) && plan.Settings.CanonFile != "canon.md")
+            sb.AppendLine($"canon_file = \"{TomlEscape(plan.Settings.CanonFile)}\"");
 
         File.WriteAllText(path, sb.ToString());
         if (plan.Settings.TestFrameworkPolicy == TestFrameworkPolicy.Specified)
@@ -161,27 +195,4 @@ public static class ProjectSettingsLoader
 
     private static string TomlEscape(string s) => s.Replace("\\", "\\\\", StringComparison.Ordinal)
         .Replace("\"", "\\\"", StringComparison.Ordinal);
-
-    private sealed class ProjectTomlDocument
-    {
-        public ProjectTomlTest? Test { get; set; }
-        public ProjectTomlDocs? Docs { get; set; }
-        public ProjectTomlFormat? Format { get; set; }
-    }
-
-    private sealed class ProjectTomlTest
-    {
-        public string? Framework { get; set; }
-        public string? Policy { get; set; }
-    }
-
-    private sealed class ProjectTomlDocs
-    {
-        public string? Style { get; set; }
-    }
-
-    private sealed class ProjectTomlFormat
-    {
-        public string? Profile { get; set; }
-    }
 }
