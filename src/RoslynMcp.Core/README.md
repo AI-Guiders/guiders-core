@@ -4,7 +4,7 @@ Shared **.NET 10** library for C# semantic tooling: Roslyn workspace (MSBuild), 
 
 Used by [RoslynMcp](https://github.com/AI-Guiders/RoslynMcp) (stdio MCP for agents) and IDE hosts such as Cascade IDE (in-process editor refactorings).
 
-**License:** [MIT](LICENSE) · [Ethical use](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
+**License:** [MIT](LICENSE) · [declaration](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
 
 ## Install
 

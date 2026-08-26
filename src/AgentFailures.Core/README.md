@@ -21,4 +21,4 @@ Env override: `AGENT_FAILURES_DIR`.
 
 ## License
 
-[MIT](LICENSE) · [Ethical use](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
+[MIT](LICENSE) · [declaration](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
