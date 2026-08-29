@@ -44,6 +44,18 @@ dotnet pack -c Release --output ./artifacts
 Get-ChildItem artifacts/*.nupkg | ForEach-Object { $_.Name }
 ```
 
+### Symbols (snupkg)
+
+`release.yml` пушит `.snupkg` **только если** соответствующий `.nupkg` реально загружен в этом прогоне (не `--skip-duplicate`). Иначе NuGet.org отклоняет symbols: PDB не совпадает с DLL уже опубликованного nupkg ([NuGet/Home#10475](https://github.com/NuGet/Home/issues/10475)).
+
+Починить failed symbols для уже опубликованной версии:
+
+1. Checkout **того же коммита**, что опубликовал nupkg (тег релиза).
+2. `dotnet pack src/Cdp.Core/Cdp.Core.csproj -c Release -o ./artifacts`
+3. `dotnet nuget push ./artifacts/AIGuiders.Cdp.Core.{version}.snupkg` (nupkg не трогать).
+
+Или bump `<Version>` и выпустить пару nupkg+snupkg заново.
+
 Packable-проекты: 17 пакетов (см. [packages-inventory.md](packages-inventory.md)). `AgentNotes.Mcp.Hosting` — `IsPackable=false`.
 
 ## 5. Проверка после CI
