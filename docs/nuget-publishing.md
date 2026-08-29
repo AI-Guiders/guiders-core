@@ -14,6 +14,17 @@
 
 Одна политика покрывает **все** пакеты `AIGuiders.*` из этого workflow (как `guiders-platform` + `release.yml`).
 
+### Известные грабли nuget.org UI
+
+Поля **Package owner** / **Add owner** **не триммят пробелы** — сравнение буквальное:
+
+| Ввод | Результат |
+|------|-----------|
+| `AIGuiders` | OK |
+| ` AIGuiders` (пробел в начале/конце) | **Owner not found** |
+
+Копипаст из markdown/таблиц часто тащит leading space. Перед Add — убедись, что курсор вплотную к первой букве. То же для **Trusted Publishing → Package owner** при создании политики.
+
 ### Снять устаревшие политики
 
 После первого успешного publish из `guiders-core` **удали** старые Trusted Publishers, привязанные к `*-core` репо. Полный чеклист: [nuget-tp-migration-checklist.md](nuget-tp-migration-checklist.md).
