@@ -46,7 +46,7 @@ Get-ChildItem artifacts/*.nupkg | ForEach-Object { $_.Name }
 
 ### Symbols (snupkg)
 
-`release.yml` пушит `.snupkg` **только если** соответствующий `.nupkg` реально загружен в этом прогоне (не `--skip-duplicate`). Иначе NuGet.org отклоняет symbols: PDB не совпадает с DLL уже опубликованного nupkg ([NuGet/Home#10475](https://github.com/NuGet/Home/issues/10475)).
+`scripts/nuget/push-artifacts.sh` (вызывается из `release.yml`) пушит `.snupkg` **только если** соответствующий `.nupkg` реально загружен в этом прогоне (не `--skip-duplicate`). Иначе NuGet.org отклоняет symbols: PDB не совпадает с DLL уже опубликованного nupkg ([NuGet/Home#10475](https://github.com/NuGet/Home/issues/10475)).
 
 Починить failed symbols для уже опубликованной версии:
 
