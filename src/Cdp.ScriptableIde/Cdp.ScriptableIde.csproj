@@ -33,7 +33,7 @@
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Language.CSharp.Anchors\AIGuiders.Platform.Language.CSharp.Anchors.csproj')" />
     <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj"
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj')" />
-    <PackageReference Include="AIGuiders.Platform.Documentation.Correspondence.Resolve" Version="0.24.0"
+    <PackageReference Include="AIGuiders.Platform.Documentation.Correspondence.Resolve" Version="0.24.1"
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj')" />
     <ProjectReference Include="..\Cdp.Evidence\Cdp.Evidence.csproj"
                       Condition="Exists('..\Cdp.Evidence\Cdp.Evidence.csproj')" />
