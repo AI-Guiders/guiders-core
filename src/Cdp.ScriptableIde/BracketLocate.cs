@@ -1,3 +1,4 @@
+using AIGuiders.Platform.Notations.Bracket;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -69,7 +70,19 @@ public static class BracketLocate
 
     public static Span Parse(string bracketOrInner)
     {
-        var text = StripOuterBrackets(bracketOrInner);
+        if (!BracketReader.Default.TryRead(
+                bracketOrInner,
+                BracketProfiles.CdpSquareKeyValue,
+                out var wire,
+                out var error)
+            || wire is null)
+            throw new ArgumentException(error);
+
+        return SpanFromWire(wire);
+    }
+
+    static Span SpanFromWire(NormalizedBracketWire wire)
+    {
         string? file = null;
         string? member = null;
         int? lineStart = null;
@@ -86,12 +99,12 @@ public static class BracketLocate
         Span? nested = null;
         var legacyNavigate = false;
 
-        foreach (var (rawKey, rawVal) in SplitAxes(text))
+        foreach (var axis in wire.Axes)
         {
-            if (!AxisAlias.TryGetValue(rawKey, out var canon))
-                throw new ArgumentException($"unknown_axis:{rawKey}");
+            if (!AxisAlias.TryGetValue(axis.Key, out var canon))
+                throw new ArgumentException($"unknown_axis:{axis.Key}");
 
-            var val = rawVal.Trim();
+            var val = axis.Value.Trim();
             switch (canon)
             {
                 case "Family":
@@ -132,7 +145,7 @@ public static class BracketLocate
                     go = val;
                     break;
                 case "Anchor":
-                    nested = Parse(val);
+                    nested = axis.Nested is not null ? SpanFromWire(axis.Nested) : Parse(val);
                     break;
             }
         }
@@ -315,14 +328,6 @@ public static class BracketLocate
             _ => canonical
         };
 
-    static string StripOuterBrackets(string? bracketOrInner)
-    {
-        var text = (bracketOrInner ?? "").Trim();
-        if (text.StartsWith('[') && text.EndsWith(']'))
-            text = text[1..^1].Trim();
-        return text;
-    }
-
     /// <summary>Strip axis separators from content needle so wire stays parseable.</summary>
     public static string SanitizeTextNeedle(string? raw)
     {
@@ -334,49 +339,6 @@ public static class BracketLocate
         if (s.Length > 96)
             s = s[..96];
         return s.Trim();
-    }
-
-    static List<(string Key, string Value)> SplitAxes(string text)
-    {
-        var list = new List<(string, string)>();
-        if (string.IsNullOrWhiteSpace(text))
-            return list;
-
-        foreach (var segment in SplitTopLevel(text, ';'))
-        {
-            var s = segment.Trim();
-            if (s.Length == 0)
-                continue;
-            var colon = s.IndexOf(':');
-            if (colon <= 0)
-                throw new ArgumentException($"bad_axis_segment:{s}");
-            list.Add((s[..colon].Trim(), s[(colon + 1)..].Trim()));
-        }
-
-        return list;
-    }
-
-    static List<string> SplitTopLevel(string text, char sep)
-    {
-        var parts = new List<string>();
-        var depth = 0;
-        var start = 0;
-        for (var i = 0; i < text.Length; i++)
-        {
-            var c = text[i];
-            if (c == '[')
-                depth++;
-            else if (c == ']')
-                depth = Math.Max(0, depth - 1);
-            else if (c == sep && depth == 0)
-            {
-                parts.Add(text[start..i]);
-                start = i + 1;
-            }
-        }
-
-        parts.Add(text[start..]);
-        return parts;
     }
 
     static void ParseLine(string val, out int? lineStart, out int? lineEnd)
