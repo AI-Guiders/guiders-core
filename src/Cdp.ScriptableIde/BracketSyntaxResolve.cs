@@ -1,6 +1,6 @@
 #nullable enable
 
-using AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn;
+using AIGuiders.Platform.Language.CSharp.Anchors;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — SSOT: <see cref="CSharpBracketAnchorResolve"/> (platform).
+/// CDP compatibility façade — SSOT: <see cref="CSharpBracketAnchorResolve"/> (Language.CSharp.Anchors).
 /// </summary>
 public static class BracketSyntaxResolve
 {
