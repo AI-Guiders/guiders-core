@@ -200,7 +200,7 @@ internal static class ProjectCanonSettingsLoader
         return (FromToml(merged.Canon), settingsPath, source);
     }
 
-    private static ProjectCanonSettings FromToml(CdpProjectToml.ProjectTomlCanon? canon) =>
+    private static ProjectCanonSettings FromToml(AIGuiders.Platform.Configurations.Project.ProjectCanonSettings? canon) =>
         new()
         {
             Lang = canon?.Lang,

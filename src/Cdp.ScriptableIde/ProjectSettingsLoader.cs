@@ -1,13 +1,8 @@
-using System.Text.Json;
-using Tomlyn;
-
 namespace Cdp.ScriptableIde;
 
 /// <summary>Load/save <see cref="ProjectSettings"/>; defaults from embedded TOML + disk overlay.</summary>
 public static class ProjectSettingsLoader
 {
-    private static readonly TomlSerializerOptions TomlOpts = CdpProjectToml.Options;
-
     /// <summary>Read embedded defaults + disk overlay (if any) then Detect-fill unset test FW.</summary>
     public static void Hydrate(PlanContext plan)
     {

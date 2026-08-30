@@ -165,7 +165,7 @@ public sealed class SemanticMapFacade(IScriptToolBus bus, PlanContext plan)
             .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
         var raw = await bus.InvokeAsync("roslyn", "roslyn_get_workspace_navigation_context", scriptArgs, ct)
             .ConfigureAwait(false);
-        return IdeReportBuilder.FromSemanticMapRelated(resolved, raw, mode).ToJson();
+        return NavigationSceneBridge.RelatedSceneJson(raw, preset, maxRelated, includeKinds, excludeKinds);
     }
 
     /// <summary>Raw Map JSON (for scene merge) — not IdeReport.</summary>
@@ -256,10 +256,21 @@ public sealed class SemanticMapExplore(IScriptToolBus bus, PlanContext plan, Cod
     }
 
     public Task<string> GetAsync(CancellationToken ct = default) =>
-        new SemanticMapFacade(bus, plan).AroundAsync(anchor, _mode, _preset, _maxRelated, _includeKinds, _excludeKinds, ct);
+        GetNavigationSceneAsync(ct);
+
+    public async Task<string> GetNavigationSceneAsync(CancellationToken ct = default)
+    {
+        var mapFacade = new SemanticMapFacade(bus, plan);
+        var mapRaw = await mapFacade.AroundRawAsync(anchor, _mode, _preset, _maxRelated, _includeKinds, _excludeKinds, ct)
+            .ConfigureAwait(false);
+        return NavigationSceneBridge.RelatedSceneJson(mapRaw, _preset, _maxRelated, _includeKinds, _excludeKinds);
+    }
 
     public async Task<string> GetSceneAsync(CancellationToken ct = default)
     {
+        if (!_withUsages)
+            return await GetNavigationSceneAsync(ct).ConfigureAwait(false);
+
         var mapFacade = new SemanticMapFacade(bus, plan);
         var mapRaw = await mapFacade.AroundRawAsync(anchor, _mode, _preset, _maxRelated, _includeKinds, _excludeKinds, ct)
             .ConfigureAwait(false);
