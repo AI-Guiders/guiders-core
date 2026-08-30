@@ -1,5 +1,5 @@
 # Публикация AIGuiders.* Core на nuget.org через Trusted Publishing (OIDC).
-# nuget.org (LonelySoul): Trusted Publishing → owner AI-Guiders, repo guiders-core, workflow release.yml
+# nuget.org: Trusted Publishing → Package owner AIGuiders, repo guiders-core, workflow release.yml
 name: release
 
 on:
@@ -32,7 +32,7 @@ jobs:
         uses: NuGet/login@v1
         id: nuget_login
         with:
-          user: LonelySoul
+          user: AIGuiders
 
       - name: Push nupkg / snupkg
         env:
