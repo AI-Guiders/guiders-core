@@ -14,8 +14,8 @@
 | Статус | Репозитории |
 |--------|-------------|
 | **Удалены** | `cdp-core`, `cdp-scriptable-ide`, `cdp-evidence`, `agent-notes-core`, `agent-task-knowledge-core`, `agent-findings-core`, `agent-failures-core`, `dotnet-debug-core`, `dotnet-build-test-core`, `dotnet-build-test-parsers`, `roslyn-mcp-core`, `git-mcp-core`, `hybrid-codebase-index-core`, `terminal-mcp-core`, `typescript-lang`, `AIGuiders.AgentNotes.Core`, `roslyn-mcp`, `dotnet-build-test-mcp-repo` |
-| **Живые monorepo** | `guiders-core`, `guiders-platform`, `guiders-ui-platform`, `guiders-plugin-host` |
-| **Живые, NuGet отдельно** (не в core) | `mcp-tool-manifest`, `webcam-mcp-shared`, `dotnet-mcp-templates`, `AIGuiders.DotnetTools` |
+| **Живые monorepo** | `guiders-core`, `guiders-platform`, `guiders-ui-platform`, `guiders-plugin-host`, **`guiders-assist`** |
+| **Живые, NuGet отдельно** (legacy до cutover) | `mcp-tool-manifest`, `webcam-mcp-shared`, `dotnet-mcp-templates`, `AIGuiders.DotnetTools` → assist после smoke |
 | **Живые, MCP exe only** (NuGet core в guiders-core) | `hybrid-codebase-index`, `dotnet-debug-mcp`, `git-mcp`, `agent-notes-mcp`, … |
 
 ### nuget.org (только вручную в UI)
@@ -34,10 +34,8 @@ API для списка Trusted Publishers нет. Открой **Account → Tr
 | `AI-Guiders` | `guiders-platform` | `release.yml` | `AIGuiders.Platform.*` |
 | `AI-Guiders` | `guiders-ui-platform` | `release.yml` | `AIGuiders.UI.*` |
 | `AI-Guiders` | `guiders-plugin-host` | `release.yml` | `AIGuiders.PluginHost.*` |
-| `AI-Guiders` | `mcp-tool-manifest` | `nuget-publish.yml` | `AIGuiders.McpToolManifest` — **не** в guiders-core |
-| `AI-Guiders` | `webcam-mcp-shared` | `nuget-publish.yml` | `AIGuiders.WebcamMcp.Shared` — **не** в guiders-core |
-| `AI-Guiders` | `dotnet-mcp-templates` | `publish.yml` | `AIGuiders.DotnetMcp.Templates` |
-| `AI-Guiders` | `AIGuiders.DotnetTools` | `publish.yml` | `AIGuiders.Cli`, `AIGuiders.DotnetTools.*` |
+| `AI-Guiders` | `guiders-assist` | `release.yml` | `AIGuiders.McpToolManifest`, `AIGuiders.DotnetMcp.Templates`, `AIGuiders.Cli`, `AIGuiders.DotnetTools.*` |
+| `AI-Guiders` | `webcam-mcp-shared` | `release.yml` | `AIGuiders.WebcamMcp.Shared` — **не** в assist |
 
 Целевой **Package owner** политики: `AIGuiders` (после миграции с `LonelySoul`). Workflow `user:` в YAML должен совпадать с аккаунтом, где создана политика.
 
@@ -82,12 +80,10 @@ API для списка Trusted Publishers нет. Открой **Account → Tr
 
 | Пакет | Репо | Решение |
 |-------|------|---------|
-| `AIGuiders.McpToolManifest` | `mcp-tool-manifest` | Оставить отдельный репо + TP |
-| `AIGuiders.WebcamMcp.Shared` | `webcam-mcp-shared` | Оставить |
-| `AIGuiders.DotnetMcp.Templates` | `dotnet-mcp-templates` | Оставить |
-| `AIGuiders.Cli` / DotnetTools | `AIGuiders.DotnetTools` | Оставить |
+| Assist packages | **`guiders-assist`** | McpToolManifest, DotnetMcp.Templates, Cli, DotnetTools — один `release.yml` |
+| `AIGuiders.WebcamMcp.Shared` | `webcam-mcp-shared` | Оставить отдельно (product domain) |
 
-Опциональный будущий merge в `guiders-core` — только если хочешь один `release.yml` на всё; выигрыш небольшой (4 маленьких пакета).
+Legacy `mcp-tool-manifest`, `dotnet-mcp-templates`, `AIGuiders.DotnetTools` — **superseded**; archive после smoke из `guiders-assist`.
 
 ---
 
@@ -107,7 +103,7 @@ API для списка Trusted Publishers нет. Открой **Account → Tr
 
 1. Под **каждым** аккаунтом (`LonelySoul`, `AIGuiders`): Trusted publishers → нет строк с repo из таблицы «удалить (orphan)».
 2. Есть ровно **одна** политика на `guiders-core` + `release.yml` (на целевом owner).
-3. `mcp-tool-manifest` / `webcam-mcp-shared` / `dotnet-mcp-templates` / `AIGuiders.DotnetTools` — политики **на месте** (если ещё публикуете оттуда).
+3. `guiders-assist` + `webcam-mcp-shared` — политики **на месте** после cutover (legacy assist TP удалить).
 4. Тест без новой версии: **Actions → guiders-core → release → Run workflow** → шаг **NuGet login** зелёный.
 
 См. также [nuget-publishing.md](nuget-publishing.md), pain **N-022** в [ANPM inventory](https://github.com/AI-Guiders/agent-nuget-pm/blob/main/docs/ANPM-pain-inventory.md).
