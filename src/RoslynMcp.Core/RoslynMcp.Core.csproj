@@ -9,7 +9,7 @@
     <AssemblyName>RoslynMcp.Core</AssemblyName>
     <Description>Shared Roslyn workspace layer for RoslynMcp (stdio MCP) and IDE hosts: code actions, rename, diagnostics, navigation.</Description>
     <PackageId>AIGuiders.RoslynMcp.Core</PackageId>
-    <Version>0.1.11</Version>
+    <Version>0.1.12</Version>
     <Authors>LonelySoul; AIGuiders</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>roslyn;mcp;csharp;refactoring;code-analysis</PackageTags>
@@ -33,6 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Policy\AIGuiders.Platform.Navigation.Policy.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Policy\AIGuiders.Platform.Navigation.Policy.csproj')" />
+    <PackageReference Include="AIGuiders.Platform.Navigation.Policy" Version="0.29.1"
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Policy\AIGuiders.Platform.Navigation.Policy.csproj')" />
     <PackageReference Include="Microsoft.Build.Locator" Version="1.9.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="5.3.0" />

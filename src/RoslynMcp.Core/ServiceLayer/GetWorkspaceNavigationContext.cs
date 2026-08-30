@@ -1,6 +1,7 @@
 #nullable enable
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using AIGuiders.Platform.Navigation.Policy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,15 +46,14 @@ public static class GetWorkspaceNavigationContext
         if (!File.Exists(solutionOrProjectPath))
             return JsonSerializer.Serialize(new { error = "not_found", message = $"solution/project not found: {solutionOrProjectPath}" }, s_compactJson);
 
-        var (mergedInc, mergedExc, presetErr) = WorkspaceNavigationPresetMerge.Merge(
+        var (mergedInc, mergedExc, presetErr) = NavigationPresetMerge.Merge(
             preset,
-            BundledWorkspaceNavigationPresets.Json,
             includeKinds,
             excludeKinds);
         if (presetErr is not null)
             return JsonSerializer.Serialize(new { error = "bad_preset", message = presetErr, preset }, s_compactJson);
 
-        var kindFilter = WorkspaceNavigationKindFilter.Create(mergedInc, mergedExc);
+        var kindFilter = NavigationKindFilter.Create(mergedInc, mergedExc);
         string anchor;
         try
         {
@@ -140,7 +140,7 @@ public static class GetWorkspaceNavigationContext
         IReadOnlyList<string> allKnownFiles,
         IReadOnlyList<string> markupPaths,
         string? solutionPath,
-        WorkspaceNavigationKindFilter kindFilter,
+        NavigationKindFilter kindFilter,
         string? presetRequested,
         int maxRelated,
         int? line,
@@ -198,7 +198,7 @@ public static class GetWorkspaceNavigationContext
                 {
                     if (items.Count >= maxRelated)
                         goto AfterPartial;
-                    AddIfNew(peer, "partial_peer", $"Partial того же типа «{name}»");
+                    AddIfNew(peer, NavigationRelatedKinds.PartialPeer, $"Partial того же типа «{name}»");
                 }
             }
         }
@@ -213,7 +213,7 @@ public static class GetWorkspaceNavigationContext
             {
                 if (items.Count >= maxRelated)
                     break;
-                AddIfNew(p.path, "xaml_codebehind_pair", p.rationale);
+                AddIfNew(p.path, NavigationRelatedKinds.XamlCodeBehindPair, p.rationale);
             }
         }
 
@@ -223,18 +223,18 @@ public static class GetWorkspaceNavigationContext
             {
                 if (items.Count >= maxRelated)
                     break;
-                AddIfNew(p.path, "test_counterpart", p.rationale);
+                AddIfNew(p.path, NavigationRelatedKinds.TestCounterpart, p.rationale);
             }
         }
 
         // Wide strokes: hard cap per loose kind so one dense folder cannot eat the card.
         // Structural kinds (partial / xaml / test) stay uncapped within maxRelated.
-        const int maxSameDirectory = 4;
-        const int maxSameNamespace = 4;
-        const int maxProjectPeer = 3;
+        var perKindCaps = NavigationKindCaps.DefaultRelated;
         var sameDirAdded = 0;
         var sameNsAdded = 0;
         var projectPeerAdded = 0;
+        int CapFor(string kind) =>
+            perKindCaps.TryGetValue(kind, out var cap) ? cap : int.MaxValue;
 
         if (items.Count < maxRelated)
         {
@@ -247,10 +247,10 @@ public static class GetWorkspaceNavigationContext
                              .OrderByDescending(f => SharedLeadingPascalTokens(anchorStem, Path.GetFileNameWithoutExtension(f)))
                              .ThenBy(f => f, StringComparer.OrdinalIgnoreCase))
                 {
-                    if (items.Count >= maxRelated || sameDirAdded >= maxSameDirectory)
+                    if (items.Count >= maxRelated || sameDirAdded >= CapFor(NavigationRelatedKinds.SameDirectory))
                         break;
                     var before = items.Count;
-                    AddIfNew(p, "same_directory", "Тот же каталог");
+                    AddIfNew(p, NavigationRelatedKinds.SameDirectory, "Тот же каталог");
                     if (items.Count > before)
                         sameDirAdded++;
                 }
@@ -266,7 +266,7 @@ public static class GetWorkspaceNavigationContext
                              .Where(f => !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
                              .OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
                 {
-                    if (items.Count >= maxRelated || sameNsAdded >= maxSameNamespace)
+                    if (items.Count >= maxRelated || sameNsAdded >= CapFor(NavigationRelatedKinds.SameNamespace))
                         break;
                     var ns = ExtractNamespaces(f);
                     if (!anchorNs.Overlaps(ns))
@@ -275,7 +275,7 @@ public static class GetWorkspaceNavigationContext
                     if (overlap is null)
                         continue;
                     var before = items.Count;
-                    AddIfNew(f, "same_namespace", $"Тот же namespace «{overlap}»");
+                    AddIfNew(f, NavigationRelatedKinds.SameNamespace, $"Тот же namespace «{overlap}»");
                     if (items.Count > before)
                         sameNsAdded++;
                 }
@@ -290,13 +290,13 @@ public static class GetWorkspaceNavigationContext
                          .Where(f => !string.Equals(Path.GetFullPath(f), Path.GetFullPath(anchor), StringComparison.OrdinalIgnoreCase))
                          .OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
             {
-                if (items.Count >= maxRelated || projectPeerAdded >= maxProjectPeer)
+                if (items.Count >= maxRelated || projectPeerAdded >= CapFor(NavigationRelatedKinds.ProjectPeer))
                     break;
                 var fp = Owning(f);
                 if (!string.IsNullOrEmpty(fp) && string.Equals(fp, anchorProj, StringComparison.OrdinalIgnoreCase))
                 {
                     var before = items.Count;
-                    AddIfNew(f, "project_peer", "Тот же проект");
+                    AddIfNew(f, NavigationRelatedKinds.ProjectPeer, "Тот же проект");
                     if (items.Count > before)
                         projectPeerAdded++;
                 }
@@ -310,12 +310,7 @@ public static class GetWorkspaceNavigationContext
             exclude_kinds_effective = kindFilter.EffectiveExcludeKinds
         };
 
-        var kindCapsPayload = new
-        {
-            same_directory = maxSameDirectory,
-            same_namespace = maxSameNamespace,
-            project_peer = maxProjectPeer
-        };
+        var kindCapsPayload = perKindCaps;
 
         var payload = new
         {
@@ -372,7 +367,7 @@ public static class GetWorkspaceNavigationContext
         IReadOnlyList<string> allKnownFiles,
         IReadOnlyList<string> markupPaths,
         string? solutionPath,
-        WorkspaceNavigationKindFilter kindFilter,
+        NavigationKindFilter kindFilter,
         string? presetRequested,
         int maxNodes,
         int maxEdges,
