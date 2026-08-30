@@ -9,7 +9,7 @@
     <RootNamespace>Cdp.ScriptableIde</RootNamespace>
     <AssemblyName>Cdp.ScriptableIde</AssemblyName>
     <PackageId>AIGuiders.Cdp.ScriptableIde</PackageId>
-    <Version>0.1.65</Version>
+    <Version>0.1.66</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>CSX allowlist host for CDP: Debug/Roslyn/Git/Verify/Symbol/SemanticMap/Work/Refactor/Annotate/Insert/Fix/Generate/Body/Settings/Packages/Projects/Solutions facades over IScriptToolBus. CodeAnchor + BracketLocate.</Description>
@@ -21,8 +21,16 @@
     <PackageReference Include="Tomlyn" Version="2.10.1" />
     <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj"
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
-    <PackageReference Include="AIGuiders.Platform.Notations.Bracket" Version="0.20.0"
+    <PackageReference Include="AIGuiders.Platform.Notations.Bracket" Version="0.20.4"
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj')" />
+    <PackageReference Include="AIGuiders.Platform.LanguageIntelligence.Anchors" Version="0.20.4"
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn.csproj')" />
+    <PackageReference Include="AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn" Version="0.20.4"
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn\AIGuiders.Platform.LanguageIntelligence.Adapters.Roslyn.csproj')" />
     <ProjectReference Include="..\Cdp.Evidence\Cdp.Evidence.csproj"
                       Condition="Exists('..\Cdp.Evidence\Cdp.Evidence.csproj')" />
     <ProjectReference Include="..\Cdp.PackageIntelligence\Cdp.PackageIntelligence.csproj"
