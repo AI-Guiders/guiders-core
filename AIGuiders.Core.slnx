@@ -12,6 +12,7 @@
     <Project Path="src/Cdp.PackageIntelligence/Cdp.PackageIntelligence.csproj" />
     <Project Path="src/Cdp.ScriptableIde/Cdp.ScriptableIde.csproj" />
     <Project Path="src/DotNetBuildTest.Core/DotNetBuildTest.Core.csproj" />
+    <Project Path="src/DotNetWorkspace.Core/DotNetWorkspace.Core.csproj" />
     <Project Path="src/DotNetBuildTestParsers/DotNetBuildTestParsers.csproj" />
     <Project Path="src/DotnetDebug.Core/DotnetDebug.Core.csproj" />
     <Project Path="src/GitMcp.Core/GitMcp.Core.csproj" />
@@ -29,6 +30,7 @@
     <Project Path="tests/Cdp.Evidence.Tests/Cdp.Evidence.Tests.csproj" />
     <Project Path="tests/Cdp.Ignite.Client.Tests/Cdp.Ignite.Client.Tests.csproj" />
     <Project Path="tests/DotNetBuildTest.Core.Tests/DotNetBuildTest.Core.Tests.csproj" />
+    <Project Path="tests/DotNetWorkspace.Core.Tests/DotNetWorkspace.Core.Tests.csproj" />
     <Project Path="tests/DotNetBuildTestParsers.Tests/DotNetBuildTestParsers.Tests.csproj" />
     <Project Path="tests/HybridCodebaseIndex.Core.Tests/HybridCodebaseIndex.Core.Tests.csproj" />
     <Project Path="tests/TerminalMcp.Core.Tests/TerminalMcp.Core.Tests.csproj" />
