@@ -23,34 +23,34 @@
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Notations.Bracket" Version="0.20.4"
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj')" />
     <PackageReference Include="AIGuiders.Platform.LanguageIntelligence.Anchors" Version="0.20.4"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.LanguageIntelligence.Anchors\AIGuiders.Platform.LanguageIntelligence.Anchors.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Language.CSharp.Anchors\AIGuiders.Platform.Language.CSharp.Anchors.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Language.CSharp.Anchors\AIGuiders.Platform.Language.CSharp.Anchors.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.CSharp.Anchors\AIGuiders.Platform.Execution.Language.CSharp.Anchors.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.CSharp.Anchors\AIGuiders.Platform.Execution.Language.CSharp.Anchors.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Language.CSharp.Anchors" Version="0.22.0"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Language.CSharp.Anchors\AIGuiders.Platform.Language.CSharp.Anchors.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.CSharp.Anchors\AIGuiders.Platform.Execution.Language.CSharp.Anchors.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Documentation.Correspondence.Resolve" Version="0.24.1"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Documentation.Correspondence.Resolve\AIGuiders.Platform.Documentation.Correspondence.Resolve.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve\AIGuiders.Platform.Execution.Documentation.Correspondence.Resolve.csproj')" />
     <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Code\AIGuiders.Platform.Navigation.Code.csproj"
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Code\AIGuiders.Platform.Navigation.Code.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Navigation.Code" Version="0.30.0"
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Navigation.Code\AIGuiders.Platform.Navigation.Code.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Workspace.Sources\AIGuiders.Platform.Configurations.Workspace.Sources.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Workspace.Sources\AIGuiders.Platform.Configurations.Workspace.Sources.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Workspace.Sources\AIGuiders.Platform.Execution.Configurations.Workspace.Sources.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Workspace.Sources\AIGuiders.Platform.Execution.Configurations.Workspace.Sources.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Configurations.Workspace.Sources" Version="0.30.0"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Workspace.Sources\AIGuiders.Platform.Configurations.Workspace.Sources.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Project.Sources\AIGuiders.Platform.Configurations.Project.Sources.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Project.Sources\AIGuiders.Platform.Configurations.Project.Sources.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Workspace.Sources\AIGuiders.Platform.Execution.Configurations.Workspace.Sources.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Project.Sources\AIGuiders.Platform.Execution.Configurations.Project.Sources.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Project.Sources\AIGuiders.Platform.Execution.Configurations.Project.Sources.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Configurations.Project.Sources" Version="0.30.0"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Configurations.Project.Sources\AIGuiders.Platform.Configurations.Project.Sources.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Language.Xml.Anchors\AIGuiders.Platform.Language.Xml.Anchors.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Language.Xml.Anchors\AIGuiders.Platform.Language.Xml.Anchors.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Configurations.Project.Sources\AIGuiders.Platform.Execution.Configurations.Project.Sources.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.Xml.Anchors\AIGuiders.Platform.Execution.Language.Xml.Anchors.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.Xml.Anchors\AIGuiders.Platform.Execution.Language.Xml.Anchors.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Language.Xml.Anchors" Version="0.30.0"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Language.Xml.Anchors\AIGuiders.Platform.Language.Xml.Anchors.csproj')" />
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.Xml.Anchors\AIGuiders.Platform.Execution.Language.Xml.Anchors.csproj')" />
     <ProjectReference Include="..\Cdp.Evidence\Cdp.Evidence.csproj"
                       Condition="Exists('..\Cdp.Evidence\Cdp.Evidence.csproj')" />
     <ProjectReference Include="..\Cdp.PackageIntelligence\Cdp.PackageIntelligence.csproj"

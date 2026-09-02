@@ -12,6 +12,8 @@ public static class CdpLanguages
     public const string Python = "python";
     public const string Delphi = "delphi";
     public const string PowerShell = "powershell";
+    public const string Fsharp = "fsharp";
+    public const string Gdl = "gdl";
 
     public static bool IsAny(string? language) =>
         string.IsNullOrWhiteSpace(language)
@@ -77,7 +79,7 @@ public sealed class LanguageRegistry
 
     /// <summary>Built-in defaults matching historical enum + detector behaviour.</summary>
     public static LanguageRegistry CreateDefault() => new(
-        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi, CdpLanguages.PowerShell],
+        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi, CdpLanguages.PowerShell, CdpLanguages.Fsharp, CdpLanguages.Gdl],
         aliases:
         [
             new("cs", CdpLanguages.Csharp),
@@ -90,12 +92,18 @@ public sealed class LanguageRegistry
             new("ps1", CdpLanguages.PowerShell),
             new("pwsh", CdpLanguages.PowerShell),
             new("ps", CdpLanguages.PowerShell),
+            new("fs", CdpLanguages.Fsharp),
+            new("f#", CdpLanguages.Fsharp),
         ],
         detectRules:
         [
             new(CdpLanguages.Csharp, "sln", 10, Extension: ".sln"),
             new(CdpLanguages.Csharp, "sln", 11, Extension: ".slnx"),
             new(CdpLanguages.Csharp, "csproj", 20, Extension: ".csproj"),
+            new(CdpLanguages.Fsharp, "fsproj", 15, Extension: ".fsproj"),
+            new(CdpLanguages.Fsharp, "fs", 16, Extension: ".fs"),
+            new(CdpLanguages.Gdl, "gdlproj", 17, Extension: ".gdlproj"),
+            new(CdpLanguages.Gdl, "gdl", 18, Extension: ".gdl"),
             new(CdpLanguages.Typescript, "tsconfig", 30, FileName: "tsconfig.json"),
             new(CdpLanguages.Python, "pyproject", 40, FileName: "pyproject.toml"),
             new(CdpLanguages.PowerShell, "ps1", 50, Extension: ".ps1"),
@@ -198,6 +206,9 @@ public sealed class LanguageRegistry
             || (rule.FileName?.Equals("tsconfig.json", StringComparison.OrdinalIgnoreCase) ?? false))
             tsconfig = anchor;
         if (rule.LanguageId.Equals(CdpLanguages.PowerShell, StringComparison.OrdinalIgnoreCase))
+            solution = anchor;
+        if (rule.LanguageId.Equals(CdpLanguages.Fsharp, StringComparison.OrdinalIgnoreCase)
+            || rule.LanguageId.Equals(CdpLanguages.Gdl, StringComparison.OrdinalIgnoreCase))
             solution = anchor;
 
         return new ProjectOpenResult(root, rule.Kind, rule.LanguageId, [anchor], solution, tsconfig);

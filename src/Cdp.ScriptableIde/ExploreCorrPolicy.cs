@@ -1,5 +1,5 @@
 #nullable enable
-using AIGuiders.Platform.Configurations.Workspace;
+using AIGuiders.Platform.Execution.Configurations.Workspace;
 
 namespace Cdp.ScriptableIde;
 

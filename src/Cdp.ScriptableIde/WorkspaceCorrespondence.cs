@@ -1,6 +1,6 @@
 #nullable enable
 
-using AIGuiders.Platform.Documentation.Correspondence;
+using AIGuiders.Platform.Execution.Documentation.Correspondence;
 
 namespace Cdp.ScriptableIde;
 
@@ -124,7 +124,7 @@ public static class WorkspaceCorrespondence
         p.ActiveLayers,
         p.TomlPath);
 
-    static ReverseAnchor MapReverse(AIGuiders.Platform.Documentation.Correspondence.ReverseAnchor r) => new(
+    static ReverseAnchor MapReverse(AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor r) => new(
         r.DocPath,
         r.DocTitle,
         r.Provenance,
@@ -143,12 +143,12 @@ public static class WorkspaceCorrespondence
         r.FeatureLine,
         r.FeatureDocs,
         r.AdrLine,
-        r.ForwardDocs.Select(d => new AIGuiders.Platform.Documentation.Correspondence.ForwardDoc(d.Path, d.Title)).ToArray(),
+        r.ForwardDocs.Select(d => new AIGuiders.Platform.Execution.Documentation.Correspondence.ForwardDoc(d.Path, d.Title)).ToArray(),
         r.ReverseAnchors.Select(MapReverseToPlatform).ToArray(),
         r.ActiveLayers,
         r.TomlPath);
 
-    static AIGuiders.Platform.Documentation.Correspondence.ReverseAnchor MapReverseToPlatform(ReverseAnchor r) => new(
+    static AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor MapReverseToPlatform(ReverseAnchor r) => new(
         r.DocPath,
         r.DocTitle,
         r.Provenance,

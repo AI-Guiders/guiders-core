@@ -1,5 +1,5 @@
-using AIGuiders.Platform.Language.Xml.Anchors;
-using AIGuiders.Platform.LanguageIntelligence.Anchors;
+using AIGuiders.Platform.Execution.Language.Xml.Anchors;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Anchors;
 
 namespace Cdp.ScriptableIde;
 

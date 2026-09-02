@@ -1,5 +1,5 @@
 using System.Text;
-using AIGuiders.Platform.Configurations.Project;
+using AIGuiders.Platform.Execution.Configurations.Project;
 
 namespace Cdp.ScriptableIde;
 

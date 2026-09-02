@@ -1,6 +1,7 @@
 #nullable enable
 
-using AIGuiders.Platform.LanguageIntelligence.Anchors;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Anchors;
+using AIGuiders.Platform.IntermediateRepresentation.Language;
 
 namespace Cdp.ScriptableIde;
 
