@@ -7,7 +7,7 @@
     <RootNamespace>Cdp.Core</RootNamespace>
     <AssemblyName>Cdp.Core</AssemblyName>
     <PackageId>AIGuiders.Cdp.Core</PackageId>
-    <Version>0.4.22</Version>
+    <Version>0.4.23</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Cognitive Dev Platform shared catalog: Memory.*/dev tool affordances, phase×object×language ranking (Cursor CDP MCP + Cascade IDE).</Description>
@@ -23,6 +23,9 @@
     <Compile Remove="Cdp.Core.Tests/**" />
     <None Remove="Cdp.Core.Tests/**" />
     <EmbeddedResource Remove="Cdp.Core.Tests/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetWorkspace.Core\DotNetWorkspace.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PACKAGE_README.md" Pack="true" PackagePath="\" />

@@ -1,5 +1,7 @@
 namespace Cdp.Core;
 
+using DotNetWorkspace.Core;
+
 /// <summary>
 /// Well-known language ids used by affordance seeds and engines.
 /// Not a closed set — hosts may register more via <see cref="LanguageRegistry"/> / TOML.
@@ -162,7 +164,7 @@ public sealed class LanguageRegistry
             if (rule.Extension is { } ex
                 && ext.Equals(ex, StringComparison.OrdinalIgnoreCase))
             {
-                return ResultFor(Path.GetDirectoryName(file)!, rule, file);
+                return ResolveRuleHit(Path.GetDirectoryName(file)!, rule, file);
             }
         }
 
@@ -179,7 +181,7 @@ public sealed class LanguageRegistry
                 {
                     var candidate = Path.Combine(cur, fn);
                     if (File.Exists(candidate))
-                        return ResultFor(cur, rule, candidate);
+                        return ResolveRuleHit(cur, rule, candidate);
                 }
 
                 if (rule.Extension is { } ex)
@@ -188,12 +190,33 @@ public sealed class LanguageRegistry
                         .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
                         .FirstOrDefault();
                     if (hit is not null)
-                        return ResultFor(cur, rule, hit);
+                        return ResolveRuleHit(cur, rule, hit);
                 }
             }
         }
 
         return new ProjectOpenResult(dir, "any", CdpLanguages.Any, []);
+    }
+
+    private static bool IsSolutionAnchor(LanguageDetectRule rule) =>
+        rule.Extension is ".sln" or ".slnx";
+
+    private ProjectOpenResult ResolveRuleHit(string root, LanguageDetectRule rule, string anchor) =>
+        IsSolutionAnchor(rule)
+            ? DetectSolutionFile(root, rule, anchor)
+            : ResultFor(root, rule, anchor);
+
+    private static ProjectOpenResult DetectSolutionFile(string root, LanguageDetectRule rule, string anchor)
+    {
+        var language = SolutionLanguageRules.TryInferFromAnchor(anchor) switch
+        {
+            SolutionLanguageComposition.CSharpOnly => CdpLanguages.Csharp,
+            SolutionLanguageComposition.FSharpOnly => CdpLanguages.Fsharp,
+            SolutionLanguageComposition.Mixed => CdpLanguages.Any,
+            _ => CdpLanguages.Any,
+        };
+
+        return new ProjectOpenResult(root, rule.Kind, language, [anchor], anchor, null);
     }
 
     private static ProjectOpenResult ResultFor(string root, LanguageDetectRule rule, string anchor)

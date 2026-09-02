@@ -8,7 +8,7 @@
     <RootNamespace>DotNetWorkspace.Core</RootNamespace>
     <AssemblyName>DotNetWorkspace.Core</AssemblyName>
     <PackageId>AIGuiders.DotNetWorkspace.Core</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Solution/project graph IR (.slnx/.sln/.csproj/.fsproj) for federation hosts (Roslyn, FCS, LRC).</Description>

@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Cdp.Core\Cdp.Core.csproj" />
+    <ProjectReference Include="..\..\src\DotNetWorkspace.Core\DotNetWorkspace.Core.csproj" />
   </ItemGroup>
 </Project>

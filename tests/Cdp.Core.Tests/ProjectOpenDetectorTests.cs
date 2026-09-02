@@ -13,13 +13,111 @@ public class ProjectOpenDetectorTests
         var dir = CreateTempDir();
         try
         {
-            var sln = Path.Combine(dir, "App.sln");
-            File.WriteAllText(sln, "Microsoft Visual Studio Solution File");
-            var r = Langs.Detect(sln);
+            var csproj = Path.Combine(dir, "App.csproj");
+            File.WriteAllText(
+                csproj,
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                </Project>
+                """);
+
+            var slnx = Path.Combine(dir, "App.slnx");
+            File.WriteAllText(
+                slnx,
+                """
+                <Solution>
+                  <Project Path="App.csproj" />
+                </Solution>
+                """);
+
+            var r = Langs.Detect(slnx);
             Assert.Equal("sln", r.Kind);
             Assert.Equal(CdpLanguages.Csharp, r.Language);
             Assert.Equal(dir, r.Root);
-            Assert.Equal(sln, r.SolutionOrProjectPath);
+            Assert.Equal(slnx, r.SolutionOrProjectPath);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Detect_FSharp_Only_Slnx()
+    {
+        var dir = CreateTempDir();
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(dir, "src"));
+            File.WriteAllText(
+                Path.Combine(dir, "src", "Lib.fsproj"),
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                  <ItemGroup><Compile Include="Lib.fs" /></ItemGroup>
+                </Project>
+                """);
+            File.WriteAllText(Path.Combine(dir, "src", "Lib.fs"), "module Lib\nlet x = 1");
+
+            var slnx = Path.Combine(dir, "Model.slnx");
+            File.WriteAllText(
+                slnx,
+                """
+                <Solution>
+                  <Project Path="src/Lib.fsproj" />
+                </Solution>
+                """);
+
+            var r = Langs.Detect(slnx);
+            Assert.Equal("sln", r.Kind);
+            Assert.Equal(CdpLanguages.Fsharp, r.Language);
+            Assert.Equal(slnx, r.SolutionOrProjectPath);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Detect_Mixed_Slnx_Returns_Any()
+    {
+        var dir = CreateTempDir();
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(dir, "app"));
+            Directory.CreateDirectory(Path.Combine(dir, "lib"));
+            File.WriteAllText(
+                Path.Combine(dir, "app", "App.csproj"),
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                </Project>
+                """);
+            File.WriteAllText(
+                Path.Combine(dir, "lib", "Lib.fsproj"),
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                  <ItemGroup><Compile Include="Lib.fs" /></ItemGroup>
+                </Project>
+                """);
+            File.WriteAllText(Path.Combine(dir, "lib", "Lib.fs"), "module Lib\nlet x = 1");
+
+            var slnx = Path.Combine(dir, "Mixed.slnx");
+            File.WriteAllText(
+                slnx,
+                """
+                <Solution>
+                  <Project Path="app/App.csproj" />
+                  <Project Path="lib/Lib.fsproj" />
+                </Solution>
+                """);
+
+            var r = Langs.Detect(slnx);
+            Assert.Equal(CdpLanguages.Any, r.Language);
+            Assert.Equal(slnx, r.SolutionOrProjectPath);
         }
         finally
         {
@@ -55,7 +153,20 @@ public class ProjectOpenDetectorTests
         var dir = CreateTempDir();
         try
         {
-            File.WriteAllText(Path.Combine(dir, "App.sln"), "sln");
+            File.WriteAllText(
+                Path.Combine(dir, "App.csproj"),
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                </Project>
+                """);
+            File.WriteAllText(
+                Path.Combine(dir, "App.slnx"),
+                """
+                <Solution>
+                  <Project Path="App.csproj" />
+                </Solution>
+                """);
             File.WriteAllText(Path.Combine(dir, "tsconfig.json"), "{}");
             var r = Langs.Detect(dir);
             Assert.Equal("sln", r.Kind);
