@@ -22,6 +22,9 @@ public sealed class CachingSolutionProjectGraphLoader(ISolutionProjectGraphLoade
         if (string.IsNullOrWhiteSpace(solutionOrProjectPath))
             return _inner.TryResolveOwningProject(filePath, null, kindFilter);
 
+        if (!File.Exists(solutionOrProjectPath))
+            return ProjectOwnershipRules.WalkUpOwningProject(filePath, kindFilter);
+
         var graph = Load(solutionOrProjectPath);
         return graph.TryResolveOwningProject(filePath, kindFilter)
             ?? ProjectOwnershipRules.WalkUpOwningProject(filePath, kindFilter);

@@ -12,6 +12,9 @@ public static class DotNetWorkspace
         set => _default = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    public static ISdkProjectContextLoader ProjectContext { get; set; } =
+        new PhasedSdkProjectContextLoader();
+
     public static SolutionProjectGraph Load(string solutionOrProjectPath) =>
         Default.Load(solutionOrProjectPath);
 
