@@ -8,21 +8,44 @@ internal static class FrameworkRefPackResolver
         if (!Directory.Exists(packsRoot))
             return [];
 
-        var versionDir = Directory.EnumerateDirectories(packsRoot)
-            .OrderByDescending(static p => p, StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault();
-
-        if (versionDir is null)
-            return [];
-
-        var refDir = Path.Combine(versionDir, "ref", targetFramework);
-        if (!Directory.Exists(refDir))
+        var refDir = ResolveRefDirectory(packsRoot, targetFramework);
+        if (refDir is null)
             return [];
 
         return Directory.EnumerateFiles(refDir, "*.dll", SearchOption.TopDirectoryOnly)
             .Select(Path.GetFullPath)
             .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    static string? ResolveRefDirectory(string packsRoot, string targetFramework)
+    {
+        string? best = null;
+        Version? bestVersion = null;
+
+        foreach (var versionDir in Directory.EnumerateDirectories(packsRoot))
+        {
+            var refDir = Path.Combine(versionDir, "ref", targetFramework);
+            if (!Directory.Exists(refDir))
+                continue;
+
+            if (!TryParsePackVersion(Path.GetFileName(versionDir), out var version))
+                continue;
+
+            if (bestVersion is null || version > bestVersion)
+            {
+                bestVersion = version;
+                best = refDir;
+            }
+        }
+
+        return best;
+    }
+
+    static bool TryParsePackVersion(string folderName, out Version version)
+    {
+        var core = folderName.Split('-', 2, StringSplitOptions.TrimEntries)[0];
+        return Version.TryParse(core, out version);
     }
 
     static string ResolveDotNetRoot()

@@ -94,6 +94,28 @@ public sealed class SdkProjectContextLoaderTests
         }
     }
 
+    [Fact]
+    public void Load_includes_framework_refs_for_guiders_fsharp_adapters_fsproj()
+    {
+        var repoRoot = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "..", "..", "..", "..", "guiders-fsharp"));
+        var fsproj = Path.Combine(
+            repoRoot,
+            "src",
+            "AIGuiders.Platform.Modeling.Language.Adapters.Fcs",
+            "AIGuiders.Platform.Modeling.Language.Adapters.Fcs.fsproj");
+
+        if (!File.Exists(fsproj))
+            return;
+
+        var ctx = new PhasedSdkProjectContextLoader().Load(fsproj, WorkspaceProjectWarm.FSharpWarmOptions);
+
+        Assert.Contains(
+            ctx.ReferenceAssemblies,
+            r => r.Contains("System.Runtime.dll", StringComparison.OrdinalIgnoreCase));
+    }
+
     static string CreateProjectRoot()
     {
         var root = Path.Combine(Path.GetTempPath(), "sdk-ctx-" + Guid.NewGuid().ToString("N"));
