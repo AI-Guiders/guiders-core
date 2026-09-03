@@ -20,14 +20,23 @@ internal static class SdkProjectFileReader
         var tfm = ReadTargetFramework(root)
             ?? throw new InvalidOperationException($"No TargetFramework in '{full}'.");
 
-        var sources = root.Descendants()
-            .Where(e => e.Name.LocalName is "Compile" or "None" && e.Attribute("Include") is not null)
-            .Select(e => e.Attribute("Include")!.Value)
-            .Where(static p => p.EndsWith(".fs", StringComparison.OrdinalIgnoreCase)
-                || p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .Select(p => Path.GetFullPath(Path.Combine(dir, p.Replace('\\', Path.DirectorySeparatorChar))))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var sources = new List<string>();
+        foreach (var itemGroup in root.Elements().Where(e => e.Name.LocalName == "ItemGroup"))
+        {
+            foreach (var item in itemGroup.Elements().Where(e => e.Name.LocalName is "Compile" or "None"))
+            {
+                var include = item.Attribute("Include")?.Value;
+                if (string.IsNullOrWhiteSpace(include))
+                    continue;
+                if (!include.EndsWith(".fs", StringComparison.OrdinalIgnoreCase)
+                    && !include.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var sourcePath = Path.GetFullPath(Path.Combine(dir, include.Replace('\\', Path.DirectorySeparatorChar)));
+                if (!sources.Contains(sourcePath, StringComparer.OrdinalIgnoreCase))
+                    sources.Add(sourcePath);
+            }
+        }
 
         var defines = ReadDefineConstants(root);
 

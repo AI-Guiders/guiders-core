@@ -116,6 +116,33 @@ public sealed class SdkProjectContextLoaderTests
             r => r.Contains("System.Runtime.dll", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void Load_preserves_fsproj_source_file_order_for_adapters_project()
+    {
+        var repoRoot = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "..", "..", "..", "..", "guiders-fsharp"));
+        var fsproj = Path.Combine(
+            repoRoot,
+            "src",
+            "AIGuiders.Platform.Modeling.Language.Adapters.Fcs",
+            "AIGuiders.Platform.Modeling.Language.Adapters.Fcs.fsproj");
+
+        if (!File.Exists(fsproj))
+            return;
+
+        var ctx = new PhasedSdkProjectContextLoader().Load(fsproj, WorkspaceProjectWarm.FSharpWarmOptions);
+        var ordered = ctx.SourceFiles
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.True(ordered.Count >= 2);
+        Assert.True(
+            ordered.FindIndex(f => f.EndsWith("IFcsProjectOptionsSource.fs", StringComparison.OrdinalIgnoreCase))
+            < ordered.FindIndex(f => f.EndsWith("FcsLanguageBackend.fs", StringComparison.OrdinalIgnoreCase)),
+            "F# compile order must follow fsproj (IFcsProjectOptionsSource before FcsLanguageBackend).");
+    }
+
     static string CreateProjectRoot()
     {
         var root = Path.Combine(Path.GetTempPath(), "sdk-ctx-" + Guid.NewGuid().ToString("N"));

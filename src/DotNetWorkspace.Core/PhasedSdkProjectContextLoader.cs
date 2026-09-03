@@ -88,12 +88,23 @@ public sealed class PhasedSdkProjectContextLoader : ISdkProjectContextLoader
         string projectDir,
         ProjectContextPhase phase)
     {
-        var sources = new HashSet<string>(projectFile.SourceFiles, StringComparer.OrdinalIgnoreCase);
+        var sources = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void add(string path)
+        {
+            var full = Path.GetFullPath(path);
+            if (seen.Add(full))
+                sources.Add(full);
+        }
+
+        foreach (var path in projectFile.SourceFiles)
+            add(path);
 
         if (sources.Count == 0)
         {
             foreach (var path in Directory.EnumerateFiles(projectDir, "*.fs", SearchOption.TopDirectoryOnly))
-                sources.Add(Path.GetFullPath(path));
+                add(path);
         }
 
         if ((int)phase >= (int)ProjectContextPhase.Built)
@@ -102,10 +113,10 @@ public sealed class PhasedSdkProjectContextLoader : ISdkProjectContextLoader
             if (Directory.Exists(objDir))
             {
                 foreach (var path in Directory.EnumerateFiles(objDir, "*.fs", SearchOption.AllDirectories))
-                    sources.Add(Path.GetFullPath(path));
+                    add(path);
             }
         }
 
-        return sources.OrderBy(static p => p, StringComparer.OrdinalIgnoreCase).ToList();
+        return sources;
     }
 }
