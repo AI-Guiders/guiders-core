@@ -58,4 +58,20 @@ internal static class SdkProjectFileReader
 
         return raw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
+
+    public static string ResolveAssemblyName(string projectPath)
+    {
+        var full = Path.GetFullPath(projectPath);
+        var doc = XDocument.Load(full);
+        var root = doc.Root ?? throw new InvalidOperationException($"Empty project file '{full}'.");
+
+        var explicitName = root.Descendants()
+            .Where(e => e.Name.LocalName == "AssemblyName")
+            .Select(e => e.Value.Trim())
+            .FirstOrDefault(static v => !string.IsNullOrWhiteSpace(v));
+
+        return !string.IsNullOrWhiteSpace(explicitName)
+            ? explicitName
+            : Path.GetFileNameWithoutExtension(full);
+    }
 }

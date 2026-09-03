@@ -42,6 +42,58 @@ public sealed class SdkProjectContextLoaderTests
         }
     }
 
+    [Fact]
+    public void Load_includes_project_reference_assemblies_for_fsproj()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "sdk-projref-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var libDir = Path.Combine(root, "Lib");
+        Directory.CreateDirectory(libDir);
+
+        var libProj = Path.Combine(libDir, "Lib.fsproj");
+        var libFs = Path.Combine(libDir, "Lib.fs");
+        var appProj = Path.Combine(root, "App.fsproj");
+        var appFs = Path.Combine(root, "App.fs");
+
+        File.WriteAllText(
+            libProj,
+            """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+              <ItemGroup><Compile Include="Lib.fs" /></ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(libFs, "module Lib\nlet value = 1\n");
+
+        File.WriteAllText(
+            appProj,
+            """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="Lib\Lib.fsproj" />
+                <Compile Include="App.fs" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(appFs, "module App\nopen Lib\nlet x = value\n");
+
+        try
+        {
+            var options = new ProjectContextLoadOptions(EnsureRestore: true, EnsureBuild: true);
+            var ctx = new PhasedSdkProjectContextLoader().Load(appProj, options);
+
+            Assert.Equal(ProjectContextPhase.Compile, ctx.Phase);
+            Assert.Contains(
+                ctx.ReferenceAssemblies,
+                r => r.EndsWith("Lib.dll", StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     static string CreateProjectRoot()
     {
         var root = Path.Combine(Path.GetTempPath(), "sdk-ctx-" + Guid.NewGuid().ToString("N"));
