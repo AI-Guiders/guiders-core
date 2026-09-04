@@ -16,6 +16,7 @@ public static class BracketLocate
         Csharp = 1,
         Xml = 2,
         Navigation = 3,
+        Fsharp = 4,
     }
 
     public sealed record Span(
