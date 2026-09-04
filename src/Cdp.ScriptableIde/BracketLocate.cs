@@ -17,6 +17,7 @@ public static class BracketLocate
         Xml = 2,
         Navigation = 3,
         Fsharp = 4,
+        Json = 5,
     }
 
     public sealed record Span(
