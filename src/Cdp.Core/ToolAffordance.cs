@@ -40,6 +40,12 @@ public sealed class SessionContext
     /// <summary>Primary csharp anchor (.sln / .csproj) when opened.</summary>
     public string? SolutionOrProjectPath { get; set; }
 
+    /// <summary>
+    /// Multi-root session: extra solution/project anchors (primary stays <see cref="SolutionOrProjectPath"/>).
+    /// Roslyn host routes by file path across primary + extras (LRU cap on the warm side).
+    /// </summary>
+    public List<string> ExtraRoots { get; } = new();
+
     /// <summary>Primary tsconfig path when opened as typescript.</summary>
     public string? TsConfigPath { get; set; }
 
@@ -60,7 +66,8 @@ public sealed class SessionContext
             project_kind = ProjectKind,
             solution_or_project_path = SolutionOrProjectPath,
             tsconfig_path = TsConfigPath,
-            scm_root = ScmRoot
+            scm_root = ScmRoot,
+            extra_roots = ExtraRoots.Count > 0 ? ExtraRoots : null
         }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
 
     public void CopyFrom(SessionContext other)
@@ -74,6 +81,8 @@ public sealed class SessionContext
         SolutionOrProjectPath = other.SolutionOrProjectPath;
         TsConfigPath = other.TsConfigPath;
         ScmRoot = other.ScmRoot;
+        ExtraRoots.Clear();
+        ExtraRoots.AddRange(other.ExtraRoots);
     }
 
     public SessionContext Clone()
