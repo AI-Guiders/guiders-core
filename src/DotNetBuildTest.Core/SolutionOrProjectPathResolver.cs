@@ -1,6 +1,6 @@
 namespace DotNetBuildTest.Core;
 
-/// <summary>Сопоставляет путь с файлом для <c>dotnet build/test/publish</c> (.sln, .slnx, .slnf, .csproj).</summary>
+/// <summary>Сопоставляет путь с файлом для <c>dotnet build/test/publish</c> (.sln, .slnx, .slnf, .csproj, .fsproj, .vbproj).</summary>
 public static class SolutionOrProjectPathResolver
 {
     public static string Resolve(string path)
@@ -12,7 +12,7 @@ public static class SolutionOrProjectPathResolver
             if (IsSolutionOrProjectFile(full))
                 return full;
 
-            throw new ArgumentException($"Not a solution/project file (.sln, .slnx, .slnf, .csproj): {path}");
+            throw new ArgumentException($"Not a solution/project file (.sln, .slnx, .slnf, .csproj, .fsproj, .vbproj): {path}");
         }
 
         if (Directory.Exists(full))
@@ -25,14 +25,18 @@ public static class SolutionOrProjectPathResolver
             if (slnx is not null)
                 return slnx;
 
-            var csprojs = Directory.GetFiles(full, "*.csproj").OrderBy(static p => p, StringComparer.OrdinalIgnoreCase).ToArray();
-            if (csprojs.Length == 1)
-                return csprojs[0];
-            if (csprojs.Length > 1)
+            var projects = Directory.EnumerateFiles(full, "*.csproj")
+                .Concat(Directory.EnumerateFiles(full, "*.fsproj"))
+                .Concat(Directory.EnumerateFiles(full, "*.vbproj"))
+                .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            if (projects.Length == 1)
+                return projects[0];
+            if (projects.Length > 1)
                 throw new ArgumentException(
-                    $"Multiple .csproj in directory; specify a .sln/.slnx, a .csproj, or a folder with a single project: {full}");
+                    $"Multiple project files in directory; specify a .sln/.slnx, a project file, or a folder with a single project: {full}");
 
-            throw new ArgumentException($"No .sln, .slnx or .csproj found in directory: {full}");
+            throw new ArgumentException($"No .sln, .slnx or project file found in directory: {full}");
         }
 
         throw new ArgumentException($"Path not found: {path}");
@@ -42,5 +46,7 @@ public static class SolutionOrProjectPathResolver
         full.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) ||
         full.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) ||
         full.EndsWith(".slnf", StringComparison.OrdinalIgnoreCase) ||
-        full.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+        full.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+        full.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase) ||
+        full.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase);
 }
