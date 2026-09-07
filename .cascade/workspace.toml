@@ -22,3 +22,7 @@ root_dir = "docs/adr"
 "OpenRecentStore.cs" = [
   "guiders-fsharp/docs/math/ide-session/07-revision-ledger.md",
 ]
+
+"src/Cdp.ScriptableIde/OpenRecentStore.cs" = [
+  "guiders-fsharp/docs/math/ide-session/07-revision-ledger.md",
+]
