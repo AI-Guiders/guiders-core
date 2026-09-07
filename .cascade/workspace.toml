@@ -1,0 +1,24 @@
+# GUIDERS-CORE habitat correspondence — Explore full-a substrate (ADR map)
+# Формат зеркален cdp-mcp/.cascade/workspace.toml.
+# NOTE: docs этого репо пока нет; канонические доки для Cdp.ScriptableIde живут
+# вSibling-репо guiders-fsharp (docs/math/ide-session). Кросс-репо ссылки —
+# кандидат на улучшение Correspondence (см. LinesForum topics/002).
+
+[workspace.adr]
+auto_include = "linked"
+max_related = 8
+root_dir = "docs/adr"
+
+[workspace.adr.map]
+# --- ScriptableIde / csx plans — L5 projection-порт ADR-0007, НЕ сам FTC ---
+# (семантика freeze/frozen-snapshots — docs/math/ide-session/03 в guiders-fsharp)
+
+"WorktreePlanRunner.cs" = [
+  "../../../../open/guiders-fsharp/docs/math/ide-session/03-frozen-snapshots.md",
+]
+"ScriptHost.cs" = [
+  "../../../../open/guiders-fsharp/docs/math/ide-session/04-jobs-lifecycle.md",
+]
+"OpenRecentStore.cs" = [
+  "../../../../open/guiders-fsharp/docs/math/ide-session/07-revision-ledger.md",
+]
