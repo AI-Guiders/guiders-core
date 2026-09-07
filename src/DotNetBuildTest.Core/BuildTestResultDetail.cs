@@ -149,7 +149,7 @@ public static class BuildTestResultDetail
             exit_code = parsed.ExitCode,
             error_count = parsed.Errors.Count,
             warning_count = parsed.Warnings.Count,
-            errors = parsed.Errors.Select(e => new { e.File, e.Line, e.Column, e.Code, e.Message }).ToArray(),
+            errors = parsed.Errors.Select(e => new { e.File, e.Line, e.Column, e.Code, e.Message, anchor = $"[F:{e.File};L:{e.Line}]" }).ToArray(),
             warnings = includeWarningsFull || eff == Full
                 ? parsed.Warnings.Select(w => new { w.File, w.Line, w.Column, w.Code, w.Message }).ToArray()
                 : parsed.Warnings.Take(3).Select(w => new { w.File, w.Line, w.Column, w.Code, w.Message }).ToArray(),

@@ -14,11 +14,11 @@ root_dir = "docs/adr"
 # (семантика freeze/frozen-snapshots — docs/math/ide-session/03 в guiders-fsharp)
 
 "WorktreePlanRunner.cs" = [
-  "../../../../open/guiders-fsharp/docs/math/ide-session/03-frozen-snapshots.md",
+  "guiders-fsharp/docs/math/ide-session/03-frozen-snapshots.md",
 ]
 "ScriptHost.cs" = [
-  "../../../../open/guiders-fsharp/docs/math/ide-session/04-jobs-lifecycle.md",
+  "guiders-fsharp/docs/math/ide-session/04-jobs-lifecycle.md",
 ]
 "OpenRecentStore.cs" = [
-  "../../../../open/guiders-fsharp/docs/math/ide-session/07-revision-ledger.md",
+  "guiders-fsharp/docs/math/ide-session/07-revision-ledger.md",
 ]
