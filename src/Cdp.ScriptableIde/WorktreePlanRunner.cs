@@ -70,6 +70,92 @@ public static class WorktreePlanRunner
         lock (Gate) return Plans.Keys.ToArray();
     }
 
+    /// <summary>
+    /// FTC (Freeze Tree Composition, Света 2026-09-07): подготовить замороженное дерево
+    /// ревизии — worktree на HEAD + оверлей WIP — БЕЗ запуска CSX. Потребитель (MSBuild,
+    /// тесты, любой процесс) получает изолированную копию и «царь и бог» в ней; гонки
+    /// за bin/obj общего дерева исчезают по построению. Освободить — Discard(planId).
+    /// </summary>
+    public static FrozenTree PrepareFrozenTree(string entryPath, string? focusPath = null)
+    {
+        string gitRoot, planScope, workRoot, branch, planId;
+        try
+        {
+            gitRoot = GitRootResolver.ResolveGitRoot(entryPath);
+            planScope = GitRootResolver.ResolvePlanScope(gitRoot, focusPath ?? entryPath);
+        }
+        catch (Exception ex)
+        {
+            return FrozenTree.Fail($"git root resolve failed: {ex.Message}", entryPath);
+        }
+
+        planId = $"frozen-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..8]}";
+        workRoot = Path.Combine(Path.GetTempPath(), "cdp-csx-worktrees", planId);
+        branch = $"cdp-frozen/{planId}";
+        Directory.CreateDirectory(Path.GetDirectoryName(workRoot)!);
+
+        try
+        {
+            RunGit(gitRoot, ["worktree", "add", "-b", branch, workRoot, "HEAD"]);
+        }
+        catch (Exception ex)
+        {
+            return FrozenTree.Fail($"git worktree add failed: {ex.Message}", gitRoot, planId, workRoot);
+        }
+
+        try
+        {
+            GitRootResolver.EnsureScopePopulated(gitRoot, workRoot, planScope);
+        }
+        catch (Exception ex)
+        {
+            TryCleanupWorktree(gitRoot, workRoot, branch);
+            return FrozenTree.Fail($"scope populate failed: {ex.Message}", gitRoot, planId, workRoot);
+        }
+
+        int overlayCount;
+        Dictionary<string, string> baseHashes;
+        string baseTreeSha;
+        try
+        {
+            (overlayCount, baseHashes) = OverlayPrimaryWorkingTree(gitRoot, workRoot, planScope);
+            baseTreeSha = SnapshotBaseTree(workRoot, planScope);
+        }
+        catch (Exception ex)
+        {
+            TryCleanupWorktree(gitRoot, workRoot, branch);
+            return FrozenTree.Fail($"overlay failed: {ex.Message}", gitRoot, planId, workRoot);
+        }
+
+        var plan = new PlanContext { PlanId = planId, PrimaryRoot = gitRoot, WorkRoot = workRoot };
+        ProjectSettingsLoader.Hydrate(plan);
+        lock (Gate)
+        {
+            Plans[planId] = new ActivePlan(
+                planId, gitRoot, workRoot, branch, planScope, baseTreeSha, baseHashes,
+                overlayCount, PromoteOverlapSafe,
+                new ScriptReport { Ok = true, Mode = "frozen", PlanId = planId });
+        }
+
+        return new FrozenTree(
+            Ok: true, Error: null, PlanId: planId, GitRoot: gitRoot, WorkRoot: workRoot,
+            PlanScope: planScope, BaseTreeSha: baseTreeSha, OverlayPathCount: overlayCount);
+    }
+
+    public sealed record FrozenTree(
+        bool Ok,
+        string? Error,
+        string PlanId,
+        string GitRoot,
+        string WorkRoot,
+        string PlanScope,
+        string BaseTreeSha,
+        int OverlayPathCount)
+    {
+        public static FrozenTree Fail(string why, string entryPath, string? planId = null, string? workRoot = null) =>
+            new(false, why, planId ?? "", entryPath, workRoot ?? "", "", "", 0);
+    }
+
     public static async Task<ScriptReport> RunInWorktreeAsync(
         string code,
         string entryPath,
