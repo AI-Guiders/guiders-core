@@ -34,7 +34,8 @@ public static class BracketLocate
         string? Command = null,
         string? Go = null,
         Span? NestedAnchor = null,
-        string? TextNeedle = null)
+        string? TextNeedle = null,
+        string? TypeKey = null)
     {
         internal BracketAnchorSpan ToPlatform() => new(
             File,
@@ -50,7 +51,8 @@ public static class BracketLocate
             Command,
             Go,
             NestedAnchor?.ToPlatform(),
-            TextNeedle);
+            TextNeedle,
+            TypeKey);
 
         internal static Span FromPlatform(BracketAnchorSpan span) => new(
             span.File,
@@ -66,7 +68,8 @@ public static class BracketLocate
             span.Command,
             span.Go,
             span.NestedAnchor is null ? null : FromPlatform(span.NestedAnchor),
-            span.TextNeedle);
+            span.TextNeedle,
+            span.TypeKey);
     }
 
     public static Span Parse(string bracketOrInner) =>
