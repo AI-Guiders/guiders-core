@@ -165,17 +165,17 @@ public static class ToolCatalog
         new()
         {
             Name = "search_agent_notes",
-            Description = "Поиск по заметкам с возвратом совпавших строк и номеров строк.",
+            Description = "Hot-only: grep по agent-notes.md (L0/L1). Не corpus KB — для тем/playbook используйте knowledge_tags (lookup/search). workspace_path опционален при primary root из --config.",
             InputSchema = Schema(new
             {
                 type = "object",
                 properties = new
                 {
-                    workspace_path = new { type = "string", description = "Каталог workspace (тот же, что при read/write)." },
+                    workspace_path = new { type = "string", description = "Каталог workspace. Опционально при primary root из --config." },
                     query = new { type = "string", description = "Подстрока для поиска (case-insensitive)." },
                     head_limit = new { type = "integer", description = "Сколько совпадений вернуть (по умолчанию 20)." }
                 },
-                required = new[] { "workspace_path", "query" }
+                required = new[] { "query" }
             })
         },
         new()
@@ -373,7 +373,7 @@ public static class ToolCatalog
         new()
         {
             Name = "knowledge_tags",
-            Description = "Canon-map MLP: индекс **Tags:** в knowledge/**/*.md. mode=inventory|lookup|explain|resolve|aliases (auto: без query→inventory, с→lookup). tag/query — #adcm или фраза («ничего о нас без нас»→#equal-standing). #ssot первыми; explain даёт preview+related. Cache+mtime. Playbook: playbook-kb-topic-hashtags-v1.",
+            Description = "Federated corpus recall (CDP-ADR-0210): индекс **Tags:** по всему knowledge/ (без workspace_path). mode=inventory|lookup|explain|resolve|aliases|search. search — substring по .md (exclude scratch/.revisions). active_scope/primary_project_id поднимают work/projects/* в выдаче; scope_only режет corpus. Hot grep — search_agent_notes. Playbook: playbook-kb-topic-hashtags-v1.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -381,10 +381,13 @@ public static class ToolCatalog
                 {
                     knowledge_path = new { type = "string", description = "Корень репозитория knowledge (каталог с подпапкой knowledge/). Опционально: primary из --config. Не задавать вместе с knowledge_root_id." },
                     knowledge_root_id = new { type = "string", description = "Опционально. id из [knowledge.roots] или [[knowledge.read_only]] (напр. group)." },
-                    subdir = new { type = "string", description = "Подкаталог внутри knowledge/ (пусто = весь knowledge/)." },
-                    mode = new { type = "string", description = "inventory | lookup | explain | resolve | aliases | auto (default)." },
+                    subdir = new { type = "string", description = "Опционально: подкаталог внутри knowledge/. Пусто = federated corpus (весь knowledge/)." },
+                    mode = new { type = "string", description = "inventory | lookup | explain | resolve | aliases | search | auto (default)." },
                     tag = new { type = "string", description = "Тема/роль: adcm или #adcm. Синоним query для точного тега." },
-                    query = new { type = "string", description = "Тег или NL/alias-фраза (resolve/explain/lookup). Если задан — перекрывает tag." },
+                    query = new { type = "string", description = "Тег, NL/alias-фраза или substring (mode=search)." },
+                    active_scope = new { type = "string", description = "Scope-first rank: door-to-singularity | portal | … (boost work/projects/<scope>/)." },
+                    primary_project_id = new { type = "string", description = "Опционально: [PRIMARY:project-id] — boost work/projects/<scope>/<id>/." },
+                    scope_only = new { type = "boolean", description = "true — только пути scope/primary; false (default) — весь corpus с rank bias." },
                     ssot_only = new { type = "boolean", description = "Только hits с #ssot (lookup/explain)." },
                     include_related = new { type = "boolean", description = "Co-occurrence related topics (default true)." },
                     refresh = new { type = "boolean", description = "Принудительно пересобрать кэш индекса." },

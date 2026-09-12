@@ -270,7 +270,10 @@ public sealed partial class NotesStorage
         string? query = null,
         bool ssotOnly = false,
         bool includeRelated = true,
-        bool refresh = false)
+        bool refresh = false,
+        string? activeScope = null,
+        string? primaryProjectId = null,
+        bool scopeOnly = false)
     {
         var root = ResolveKnowledgeRoot(knowledgePath, knowledgeRootId);
         var knowledgeRoot = Path.Combine(root, KnowledgeDirName);
@@ -286,7 +289,10 @@ public sealed partial class NotesStorage
             ssotOnly,
             includeRelated,
             limit,
-            refresh);
+            refresh,
+            activeScope,
+            primaryProjectId,
+            scopeOnly);
     }
 
     private void InvalidateKnowledgeTagIndex(string repoRoot) =>

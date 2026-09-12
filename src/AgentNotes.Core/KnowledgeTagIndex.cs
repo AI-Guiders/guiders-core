@@ -40,6 +40,9 @@ public static partial class KnowledgeTagIndex
         ["dialogue delta"] = "dialogue-delta",
         ["historiography"] = "historiography",
         ["see history"] = "historiography",
+        ["pml"] = "engineering-pml",
+        ["aveva pml"] = "engineering-pml",
+        ["engineering pml"] = "engineering-pml",
     };
 
     public static void Invalidate(string knowledgeRootAbsolute)
@@ -66,15 +69,50 @@ public static partial class KnowledgeTagIndex
         bool ssotOnly,
         bool includeRelated,
         int limit,
-        bool refresh)
+        bool refresh,
+        string? activeScope = null,
+        string? primaryProjectId = null,
+        bool scopeOnly = false)
     {
         knowledgeRoot = Path.GetFullPath(knowledgeRoot);
         searchDir ??= knowledgeRoot;
         searchDir = Path.GetFullPath(searchDir);
         var lim = Math.Clamp(limit, 1, 500);
+        var hints = KnowledgeCorpusRecall.BuildHints(activeScope, primaryProjectId, scopeOnly);
         var m = (mode ?? "").Trim().ToLowerInvariant();
         if (m is "" or "auto")
             m = string.IsNullOrWhiteSpace(tagOrQuery) ? "inventory" : "lookup";
+
+        if (m is "search")
+        {
+            if (string.IsNullOrWhiteSpace(tagOrQuery))
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    mode = "search",
+                    path = searchDir,
+                    query = tagOrQuery,
+                    policy = "query_required",
+                    total = 0,
+                    hits = Array.Empty<object>()
+                }, JsonOptions);
+            }
+
+            if (!Directory.Exists(searchDir))
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    mode = "search",
+                    path = searchDir,
+                    query = tagOrQuery,
+                    files_scanned = 0,
+                    total = 0,
+                    hits = Array.Empty<object>()
+                }, JsonOptions);
+            }
+
+            return KnowledgeCorpusRecall.Search(knowledgeRoot, searchDir, tagOrQuery, lim, hints);
+        }
 
         if (!Directory.Exists(searchDir))
         {
@@ -217,7 +255,9 @@ public static partial class KnowledgeTagIndex
             entries = entries.Where(e => e.Ssot).ToList();
 
         var ordered = entries
-            .OrderByDescending(e => e.Ssot)
+            .Where(e => KnowledgeCorpusRecall.PassesScopeOnly(e.Path, hints))
+            .OrderByDescending(e => KnowledgeCorpusRecall.ScopeBoost(e.Path, hints))
+            .ThenByDescending(e => e.Ssot)
             .ThenBy(e => e.Path, StringComparer.Ordinal)
             .Take(lim)
             .ToList();

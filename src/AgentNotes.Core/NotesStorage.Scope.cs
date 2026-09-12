@@ -61,6 +61,14 @@ public sealed partial class NotesStorage
         return true;
     }
 
+    /// <summary>Normalize <paramref name="activeScope"/> for corpus recall (no workspace / hot sections).</summary>
+    public static string NormalizeCorpusScope(string? activeScope)
+    {
+        if (string.IsNullOrWhiteSpace(activeScope))
+            return "";
+        return NormalizeScope(activeScope, LoadScopeAliasesMerged());
+    }
+
     /// <summary>Maps legacy shorthand to canonical ids when defined in merged alias dictionary.</summary>
     private static string NormalizeScope(string scope, IReadOnlyDictionary<string, string> aliases)
     {
