@@ -165,7 +165,7 @@ public static class ToolCatalog
         new()
         {
             Name = "search_agent_notes",
-            Description = "Hot-only: grep по agent-notes.md (L0/L1). Не corpus KB — для тем/playbook используйте knowledge_tags (lookup/search). workspace_path опционален при primary root из --config.",
+            Description = "HOT ONLY — grep agent-notes.md (L0/L1 session notes). Not corpus KB — use recall_knowledge for topics/playbooks/incidents. workspace_path optional when primary root from --config.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -372,8 +372,28 @@ public static class ToolCatalog
         },
         new()
         {
+            Name = "recall_knowledge",
+            Description = "Unified KB recall — auto picks corpus (tags/search) then hot notes. Prefer this over search_agent_notes / bare knowledge_tags.",
+            InputSchema = Schema(new
+            {
+                type = "object",
+                properties = new
+                {
+                    query = new { type = "string", description = "Free text or tag-like topic to find in KB." },
+                    layer = new { type = "string", description = "auto | corpus | hot (default auto)." },
+                    limit = new { type = "integer", description = "Max hits 1–50 (default 15)." },
+                    active_scope = new { type = "string", description = "Scope-first rank boost (CDP-ADR-0210)." },
+                    primary_project_id = new { type = "string", description = "[PRIMARY:project-id] rank boost." },
+                    scope_only = new { type = "boolean", description = "Corpus filter to scope/primary paths only." },
+                    workspace_path = new { type = "string", description = "Hot layer only; optional when primary root from --config." }
+                },
+                required = new[] { "query" }
+            })
+        },
+        new()
+        {
             Name = "knowledge_tags",
-            Description = "Federated corpus recall (CDP-ADR-0210): индекс **Tags:** по всему knowledge/ (без workspace_path). mode=inventory|lookup|explain|resolve|aliases|search. search — substring по .md (exclude scratch/.revisions). active_scope/primary_project_id поднимают work/projects/* в выдаче; scope_only режет corpus. Hot grep — search_agent_notes. Playbook: playbook-kb-topic-hashtags-v1.",
+            Description = "CORPUS — tags/search over knowledge/; prefer recall_knowledge for agents. mode=inventory|lookup|explain|resolve|aliases|search. Federated (CDP-ADR-0210). active_scope/primary_project_id rank work/projects/*. Playbook: playbook-kb-topic-hashtags-v1.",
             InputSchema = Schema(new
             {
                 type = "object",

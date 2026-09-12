@@ -11,6 +11,7 @@ public class PhaseObjectCatalogTests
     public void Explore_Kb_Includes_World_KnowledgeTags()
     {
         var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite);
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_recall_knowledge");
         Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
         Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_world_write_knowledge_file");
     }
@@ -20,6 +21,7 @@ public class PhaseObjectCatalogTests
     {
         var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Recall, CdpObjectKind.Kb, CdpIntent.Cite);
         Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_get_definition");
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_recall_knowledge");
         Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
         Assert.DoesNotContain(hits, h => h.Affordance.UnderlyingName == "list_knowledge_files");
         Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_project_get_definition");

@@ -62,6 +62,7 @@ public sealed class ToolHandlers
             "read_knowledge_file" => ReadKnowledgeFile(args),
             "list_knowledge_files" => ListKnowledgeFiles(args),
             "knowledge_tags" => KnowledgeTags(args),
+            "recall_knowledge" => RecallKnowledge(args),
             "get_definition" => GetDefinition(args),
             "list_pack" => ListPack(args),
             "get_process" => GetProcess(args),
@@ -287,6 +288,27 @@ public sealed class ToolHandlers
         var knowledgeRootId = ToolArgs.OptionalKnowledgeRootId(args);
         var subdir = ToolArgs.OptionalString(args, "subdir");
         return _storage.ListKnowledgeFiles(knowledgePath, subdir, knowledgeRootId);
+    }
+
+    private string RecallKnowledge(IReadOnlyDictionary<string, JsonElement> args)
+    {
+        var query = ToolArgs.RequiredString(args, "query");
+        var layer = ToolArgs.OptionalString(args, "layer");
+        var limit = ToolArgs.GetIntOrDefault(args, "limit", 15, 1, 50);
+        var activeScope = ToolArgs.OptionalString(args, "active_scope");
+        var primaryProjectId = ToolArgs.OptionalString(args, "primary_project_id");
+        var scopeOnly = ToolArgs.GetBoolOrDefault(args, "scope_only", false);
+        var workspacePath = ToolArgs.OptionalString(args, "workspace_path");
+        if (string.IsNullOrWhiteSpace(workspacePath) && AgentNotesRuntime.TryGetPrimaryKnowledgeRoot(out _))
+            workspacePath = "";
+        return _storage.RecallKnowledge(
+            query,
+            layer,
+            limit,
+            activeScope,
+            primaryProjectId,
+            scopeOnly,
+            workspacePath);
     }
 
     private string KnowledgeTags(IReadOnlyDictionary<string, JsonElement> args)

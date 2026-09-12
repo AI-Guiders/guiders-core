@@ -260,6 +260,25 @@ public sealed partial class NotesStorage
     /// <summary>
     /// MLP tag index over knowledge/**/*.md (<c>**Tags:**</c>): inventory / lookup / explain / resolve / aliases.
     /// </summary>
+    /// <summary>CDP-ADR-0218 unified recall facade (corpus then hot).</summary>
+    public string RecallKnowledge(
+        string query,
+        string? layer = null,
+        int limit = 15,
+        string? activeScope = null,
+        string? primaryProjectId = null,
+        bool scopeOnly = false,
+        string? workspacePath = null) =>
+        KnowledgeRecallFacade.Recall(
+            this,
+            query,
+            layer,
+            limit,
+            activeScope,
+            primaryProjectId,
+            scopeOnly,
+            workspacePath);
+
     public string QueryKnowledgeTags(
         string? knowledgePath,
         string? tag = null,
@@ -586,13 +605,25 @@ public sealed partial class NotesStorage
             });
         }
 
-        var payload = new
-        {
-            query,
-            total_matches = totalMatches,
-            returned_matches = returned.Count,
-            matches = returned
-        };
+        object payload = totalMatches == 0
+            ? new
+            {
+                query,
+                layer = "hot",
+                searched = "agent-notes.md",
+                total_matches = totalMatches,
+                returned_matches = returned.Count,
+                matches = returned,
+                hint = "Corpus topics are not in hot agent-notes.md — use memory_world_recall_knowledge for KB/playbook/incident search.",
+                try_next = new { tool = "memory_world_recall_knowledge", query }
+            }
+            : new
+            {
+                query,
+                total_matches = totalMatches,
+                returned_matches = returned.Count,
+                matches = returned
+            };
 
         return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
     }
