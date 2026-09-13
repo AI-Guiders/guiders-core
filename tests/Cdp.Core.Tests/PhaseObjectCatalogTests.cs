@@ -251,4 +251,16 @@ public class PhaseObjectCatalogTests
         Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_commit");
         Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_push");
     }
+
+    [Fact]
+    public void Verify_Code_Ship_Includes_Git_Plan()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed,
+            CdpPhase.Verify,
+            CdpObjectKind.Code,
+            CdpIntent.Ship,
+            limit: PhaseObjectCatalog.MaxQueryLimit);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_plan");
+    }
 }
