@@ -10,7 +10,7 @@
 
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <Authors>AI Guiders</Authors>
 

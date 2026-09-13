@@ -2,7 +2,7 @@ namespace Cdp.ScriptableIde;
 
 /// <summary>
 /// Vendor catalog endpoints for TFM/engine/package resolvers.
-/// SSOT for URLs = host config (<c>[vendor_catalog]</c> in cdp-mcp.toml); code only reads <see cref="Current"/>.
+/// SSOT for URLs = host config (<c>[vendor_catalog]</c> in cdp-mcp.toml); code only reads <see cref="VendorCatalog.Current"/>.
 /// </summary>
 public sealed class VendorCatalogOptions
 {

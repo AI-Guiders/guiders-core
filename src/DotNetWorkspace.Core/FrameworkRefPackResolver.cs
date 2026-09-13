@@ -42,7 +42,7 @@ internal static class FrameworkRefPackResolver
         return best;
     }
 
-    static bool TryParsePackVersion(string folderName, out Version version)
+    static bool TryParsePackVersion(string folderName, out Version? version)
     {
         var core = folderName.Split('-', 2, StringSplitOptions.TrimEntries)[0];
         return Version.TryParse(core, out version);
