@@ -1,12 +1,12 @@
 #nullable enable
 
-using AIGuiders.Platform.Execution.LanguageIntelligence.Anchors;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 using AIGuiders.Platform.IntermediateRepresentation.Language;
 
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — SSOT: <see cref="BracketAnchorWire"/> / <see cref="BracketAnchorSpan"/> (platform).
+/// CDP compatibility façade — SSOT: <see cref="BracketRelationWire"/> / <see cref="BracketAnchorSpan"/> (platform).
 /// </summary>
 public static class BracketLocate
 {
@@ -73,17 +73,17 @@ public static class BracketLocate
     }
 
     public static Span Parse(string bracketOrInner) =>
-        Span.FromPlatform(BracketAnchorWire.Parse(bracketOrInner));
+        Span.FromPlatform(BracketRelationWire.Parse(bracketOrInner));
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = BracketAnchorWire.ClassifyFamily(span.ToPlatform(), out error);
+        var family = BracketRelationWire.ClassifyFamily(span.ToPlatform(), out error);
         return (AxisFamily)(int)family;
     }
 
     public static string Format(Span span, bool preferCanonical = false) =>
-        BracketAnchorWire.Format(span.ToPlatform(), preferCanonical);
+        BracketRelationWire.Format(span.ToPlatform(), preferCanonical);
 
     public static string SanitizeTextNeedle(string? raw) =>
-        BracketAnchorWire.SanitizeTextNeedle(raw);
+        BracketRelationWire.SanitizeTextNeedle(raw);
 }

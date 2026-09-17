@@ -23,10 +23,10 @@
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Notations.Bracket" Version="0.20.4"
                       Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Notations.Bracket\AIGuiders.Platform.Notations.Bracket.csproj')" />
-    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj"
-                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj')" />
-    <PackageReference Include="AIGuiders.Platform.LanguageIntelligence.Anchors" Version="0.20.4"
-                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors\AIGuiders.Platform.Execution.LanguageIntelligence.Anchors.csproj')" />
+    <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Relations\AIGuiders.Platform.Execution.LanguageIntelligence.Relations.csproj"
+                      Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Relations\AIGuiders.Platform.Execution.LanguageIntelligence.Relations.csproj')" />
+    <PackageReference Include="AIGuiders.Platform.LanguageIntelligence.Relations" Version="0.20.4"
+                      Condition="!Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.LanguageIntelligence.Relations\AIGuiders.Platform.Execution.LanguageIntelligence.Relations.csproj')" />
     <ProjectReference Include="..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.CSharp.Anchors\AIGuiders.Platform.Execution.Language.CSharp.Anchors.csproj"
                       Condition="Exists('..\..\..\guiders-platform\src\AIGuiders.Platform.Execution.Language.CSharp.Anchors\AIGuiders.Platform.Execution.Language.CSharp.Anchors.csproj')" />
     <PackageReference Include="AIGuiders.Platform.Language.CSharp.Anchors" Version="0.22.0"
