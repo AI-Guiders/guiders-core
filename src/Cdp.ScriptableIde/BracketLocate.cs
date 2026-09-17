@@ -6,7 +6,7 @@ using AIGuiders.Platform.Execution.LanguageIntelligence;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — SSOT: <see cref="BracketRelationWire"/> / <see cref="BracketAnchorSpan"/> (platform).
+/// CDP compatibility façade — legacy span parse via <see cref="LegacyBracketRelationWire"/>; Kind: canon via Modeling <c>BracketRelationWire</c>.
 /// </summary>
 public static class BracketLocate
 {
@@ -73,17 +73,17 @@ public static class BracketLocate
     }
 
     public static Span Parse(string bracketOrInner) =>
-        Span.FromPlatform(BracketRelationWire.Parse(bracketOrInner));
+        Span.FromPlatform(LegacyBracketRelationWire.Parse(bracketOrInner));
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = BracketRelationWire.ClassifyFamily(span.ToPlatform(), out error);
+        var family = LegacyBracketRelationWire.ClassifyFamily(span.ToPlatform(), out error);
         return (AxisFamily)(int)family;
     }
 
     public static string Format(Span span, bool preferCanonical = false) =>
-        BracketRelationWire.Format(span.ToPlatform(), preferCanonical);
+        LegacyBracketRelationWire.Format(span.ToPlatform(), preferCanonical);
 
     public static string SanitizeTextNeedle(string? raw) =>
-        BracketRelationWire.SanitizeTextNeedle(raw);
+        LegacyBracketRelationWire.SanitizeTextNeedle(raw);
 }
