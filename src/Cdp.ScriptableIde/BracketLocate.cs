@@ -1,7 +1,7 @@
 #nullable enable
 
 using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
-using AIGuiders.Platform.IntermediateRepresentation.Language;
+using AIGuiders.Platform.Execution.LanguageIntelligence;
 
 namespace Cdp.ScriptableIde;
 
