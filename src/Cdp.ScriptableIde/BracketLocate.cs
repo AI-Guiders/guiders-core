@@ -1,12 +1,12 @@
 #nullable enable
 
-using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 using AIGuiders.Platform.Execution.LanguageIntelligence;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — legacy span parse via <see cref="LegacyBracketRelationWire"/>; Kind: canon via Modeling <c>BracketRelationWire</c>.
+/// CDP compatibility façade — Kind-first parse via <see cref="RelationSpecWireBoundary"/> with legacy F/M/L fallback via <see cref="RelationWireBoundary"/>.
 /// </summary>
 public static class BracketLocate
 {
@@ -72,18 +72,23 @@ public static class BracketLocate
             span.TypeKey);
     }
 
-    public static Span Parse(string bracketOrInner) =>
-        Span.FromPlatform(LegacyBracketRelationWire.Parse(bracketOrInner));
+    public static Span Parse(string bracketOrInner)
+    {
+        var spec = RelationSpecWireBoundary.TryParseKindSpec(bracketOrInner);
+        if (spec is not null && RelationSpecLegacyBridge.TryToLegacySpan(spec, out var bridged))
+            return Span.FromPlatform(bridged);
+        return Span.FromPlatform(RelationWireBoundary.Parse(bracketOrInner));
+    }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = LegacyBracketRelationWire.ClassifyFamily(span.ToPlatform(), out error);
+        var family = RelationWireBoundary.ClassifyFamily(span.ToPlatform(), out error);
         return (AxisFamily)(int)family;
     }
 
     public static string Format(Span span, bool preferCanonical = false) =>
-        LegacyBracketRelationWire.Format(span.ToPlatform(), preferCanonical);
+        RelationWireBoundary.Format(span.ToPlatform(), preferCanonical);
 
     public static string SanitizeTextNeedle(string? raw) =>
-        LegacyBracketRelationWire.SanitizeTextNeedle(raw);
+        RelationWireBoundary.SanitizeTextNeedle(raw);
 }
