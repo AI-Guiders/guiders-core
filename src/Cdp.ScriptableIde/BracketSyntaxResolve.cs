@@ -34,7 +34,7 @@ public static class BracketSyntaxResolve
 
     public static bool TryResolve(string absoluteFilePath, BracketLocate.Span span, out TextRange range, out string detail)
     {
-        var ok = CSharpBracketAnchorResolve.TryResolve(absoluteFilePath, span.ToLegacyWire(), out var platformRange, out detail);
+        var ok = CSharpBracketAnchorResolve.TryResolve(absoluteFilePath, span.ToCodeEditAxes(), out var platformRange, out detail);
         range = ok ? TextRange.From(platformRange) : default!;
         return ok;
     }
@@ -46,7 +46,7 @@ public static class BracketSyntaxResolve
         out TextRange range,
         out string detail)
     {
-        var axes = span.ToLegacyWire().ToCodeEditAxes();
+        var axes = span.ToCodeEditAxes();
         var ok = CSharpBracketAnchorResolve.TryResolve(
             absoluteFilePath,
             sourceText,
@@ -65,7 +65,7 @@ public static class BracketSyntaxResolve
     {
         var ok = CSharpBracketAnchorResolve.TryFindAttachTarget(
             absoluteFilePath,
-            span.ToLegacyWire(),
+            span.ToCodeEditAxes(),
             out var platformTarget,
             out detail);
         target = ok ? AttachTarget.From(platformTarget) : default!;
@@ -79,7 +79,7 @@ public static class BracketSyntaxResolve
         out AttachTarget target,
         out string detail)
     {
-        var axes = span.ToLegacyWire().ToCodeEditAxes();
+        var axes = span.ToCodeEditAxes();
         var ok = CSharpBracketAnchorResolve.TryFindAttachTarget(
             absoluteFilePath,
             sourceText,
