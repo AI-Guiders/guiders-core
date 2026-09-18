@@ -25,7 +25,7 @@ public static class BracketXmlResolve
         var ok = XmlBracketAnchorResolve.TryResolve(
             absoluteFilePath,
             sourceText,
-            span.ToPlatform(),
+            span.ToLegacyWire(),
             out var platform,
             out detail);
         if (!ok)

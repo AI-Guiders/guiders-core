@@ -127,22 +127,22 @@ public static class WorkspaceCorrespondence
         p.FeatureDocs,
         p.AdrLine,
         p.ForwardDocs.Select(d => new ForwardDoc(d.Path, d.Title, d.Abs, d.Kind)).ToArray(),
-        p.ReverseAnchors.Select(MapReverse).ToArray(),
+        p.DocToCodeWitnesses.Select(MapReverse).ToArray(),
         p.ActiveLayers,
         p.TomlPath);
 
-    static ReverseAnchor MapReverse(AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor r) => new(
-        r.DocPath,
-        r.DocTitle,
-        r.Provenance,
-        r.Kind,
-        r.File,
-        r.LineStart,
-        r.LineEnd,
-        r.MemberKey,
-        r.Wire,
-        r.DocLineHint,
-        r.Excerpt);
+    static ReverseAnchor MapReverse(DocToCodeWitness w) => new(
+        w.DocPath,
+        w.DocTitle,
+        w.Provenance,
+        w.Kind,
+        w.File,
+        w.LineStart,
+        w.LineEnd,
+        w.MemberKey,
+        w.Wire,
+        w.DocLineHint,
+        w.Excerpt);
 
     static CorrespondenceResult MapToPlatform(Result r) => new(
         r.WorkspaceRoot,
@@ -155,7 +155,7 @@ public static class WorkspaceCorrespondence
         r.ActiveLayers,
         r.TomlPath);
 
-    static AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor MapReverseToPlatform(ReverseAnchor r) => new(
+    static DocToCodeWitness MapReverseToPlatform(ReverseAnchor r) => new(
         r.DocPath,
         r.DocTitle,
         r.Provenance,

@@ -6,7 +6,7 @@ using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — Kind-first parse via <see cref="RelationSpecWireBoundary"/> with legacy F/M/L fallback via <see cref="RelationWireBoundary"/>.
+/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with legacy F/M/L fallback via <see cref="RelationWireBoundary"/>.
 /// </summary>
 public static class BracketLocate
 {
@@ -37,7 +37,7 @@ public static class BracketLocate
         string? TextNeedle = null,
         string? TypeKey = null)
     {
-        internal BracketAnchorSpan ToPlatform() => new(
+        internal LegacyWireSpan ToLegacyWire() => new(
             File,
             MemberKey,
             LineStart,
@@ -50,11 +50,11 @@ public static class BracketLocate
             Family,
             Command,
             Go,
-            NestedAnchor?.ToPlatform(),
+            NestedAnchor?.ToLegacyWire(),
             TextNeedle,
             TypeKey);
 
-        internal static Span FromPlatform(BracketAnchorSpan span) => new(
+        internal static Span FromLegacyWire(LegacyWireSpan span) => new(
             span.File,
             span.MemberKey,
             span.LineStart,
@@ -67,27 +67,43 @@ public static class BracketLocate
             span.Family,
             span.Command,
             span.Go,
-            span.NestedAnchor is null ? null : FromPlatform(span.NestedAnchor),
+            span.NestedAnchor is null ? null : FromLegacyWire(span.NestedAnchor),
             span.TextNeedle,
             span.TypeKey);
+
+        internal static Span FromAxes(CodeEditResolveAxes axes) => new(
+            axes.File,
+            axes.MemberKey,
+            axes.LineStart,
+            axes.LineEnd,
+            axes.ScopeKind,
+            axes.ScopeIndex,
+            axes.Role,
+            axes.XmlPath,
+            axes.Attr,
+            Family: null,
+            Command: null,
+            Go: null,
+            NestedAnchor: null,
+            axes.TextNeedle,
+            axes.TypeKey);
     }
 
     public static Span Parse(string bracketOrInner)
     {
-        var spec = RelationSpecWireBoundary.TryParseKindSpec(bracketOrInner);
-        if (spec is not null && RelationSpecLegacyBridge.TryToLegacySpan(spec, out var bridged))
-            return Span.FromPlatform(bridged);
-        return Span.FromPlatform(RelationWireBoundary.Parse(bracketOrInner));
+        if (BracketResolveBoundary.TryParseToAxes(bracketOrInner, out var axes, out _))
+            return Span.FromAxes(axes);
+        return Span.FromLegacyWire(RelationWireBoundary.Parse(bracketOrInner));
     }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = RelationWireBoundary.ClassifyFamily(span.ToPlatform(), out error);
+        var family = RelationWireBoundary.ClassifyFamily(span.ToLegacyWire(), out error);
         return (AxisFamily)(int)family;
     }
 
     public static string Format(Span span, bool preferCanonical = false) =>
-        RelationWireBoundary.Format(span.ToPlatform(), preferCanonical);
+        RelationWireBoundary.Format(span.ToLegacyWire(), preferCanonical);
 
     public static string SanitizeTextNeedle(string? raw) =>
         RelationWireBoundary.SanitizeTextNeedle(raw);
