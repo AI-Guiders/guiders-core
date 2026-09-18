@@ -6,7 +6,7 @@ using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with legacy F/M/L fallback via <see cref="RelationWireBoundary"/>.
+/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with doc-scan F/M/L fallback.
 /// </summary>
 public static class BracketLocate
 {
@@ -37,40 +37,6 @@ public static class BracketLocate
         string? TextNeedle = null,
         string? TypeKey = null)
     {
-        internal LegacyWireSpan ToLegacyWire() => new(
-            File,
-            MemberKey,
-            LineStart,
-            LineEnd,
-            ScopeKind,
-            ScopeIndex,
-            Role,
-            XmlPath,
-            Attr,
-            Family,
-            Command,
-            Go,
-            NestedAnchor?.ToLegacyWire(),
-            TextNeedle,
-            TypeKey);
-
-        internal static Span FromLegacyWire(LegacyWireSpan span) => new(
-            span.File,
-            span.MemberKey,
-            span.LineStart,
-            span.LineEnd,
-            span.ScopeKind,
-            span.ScopeIndex,
-            span.Role,
-            span.XmlPath,
-            span.Attr,
-            span.Family,
-            span.Command,
-            span.Go,
-            span.NestedAnchor is null ? null : FromLegacyWire(span.NestedAnchor),
-            span.TextNeedle,
-            span.TypeKey);
-
         internal static Span FromAxes(CodeEditResolveAxes axes) => new(
             axes.File,
             axes.MemberKey,
@@ -96,6 +62,43 @@ public static class BracketLocate
             Family: "navigation",
             Command: axes.Command,
             Go: axes.Go);
+
+        internal WireFamilyClassifier.Probe ToFamilyProbe() => new(
+            File,
+            MemberKey,
+            LineStart,
+            ScopeKind,
+            Role,
+            XmlPath,
+            Attr,
+            Family,
+            Command,
+            Go,
+            NestedAnchor?.ToFamilyProbe(),
+            TextNeedle,
+            TypeKey);
+
+        internal CodeEditResolveAxes ToCodeEditAxes() => new(
+            File,
+            MemberKey,
+            LineStart,
+            LineEnd,
+            ScopeKind,
+            ScopeIndex,
+            Role,
+            XmlPath,
+            Attr,
+            TextNeedle,
+            TypeKey);
+
+        internal NavResolveAxes ToNavAxes() => new(
+            File,
+            LineStart,
+            Column: null,
+            Command,
+            Go,
+            Solution: null,
+            Member: MemberKey);
     }
 
     public static Span Parse(string bracketOrInner)
@@ -105,34 +108,28 @@ public static class BracketLocate
         if (BracketResolveBoundary.TryParseNav(bracketOrInner, out var nav, out _))
             return Span.FromNavAxes(nav);
 
-        var legacy = RelationWireBoundary.Parse(bracketOrInner);
-        if (RelationWireBoundary.ClassifyFamily(legacy, out _) == BracketAxisFamily.Navigation
-            && NavResolveProjection.TryFromLegacyNav(legacy, out nav))
-            return Span.FromNavAxes(nav);
-
-        return Span.FromLegacyWire(legacy);
+        throw new ArgumentException("unsupported_wire");
     }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = RelationWireBoundary.ClassifyFamily(span.ToLegacyWire(), out error);
+        var family = WireFamilyClassifier.Classify(span.ToFamilyProbe(), out error);
         return (AxisFamily)(int)family;
     }
 
     public static string Format(Span span, bool preferCanonical = false)
     {
-        var legacy = span.ToLegacyWire();
+        _ = preferCanonical;
         if (ClassifyFamily(span, out _) == AxisFamily.Navigation)
         {
-            if (BracketResolveBoundary.TryFormatNav(legacy, out var navWire))
+            if (BracketResolveBoundary.TryFormatNav(span.ToNavAxes(), out var navWire))
                 return navWire;
-            return RelationWireBoundary.Format(legacy, preferCanonical);
         }
 
-        if (BracketResolveBoundary.TryFormatCodeEdit(legacy, out var kindWire))
+        if (BracketResolveBoundary.TryFormatCodeEdit(span.ToCodeEditAxes(), out var kindWire))
             return kindWire;
 
-        return RelationWireBoundary.Format(legacy, preferCanonical);
+        throw new ArgumentException("unsupported_wire");
     }
 
     public static string SanitizeTextNeedle(string? raw) =>
