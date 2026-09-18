@@ -6,7 +6,7 @@ using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with doc-scan F/M/L fallback.
+/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with doc-scan F/M/L fallback for code edit only.
 /// </summary>
 public static class BracketLocate
 {
