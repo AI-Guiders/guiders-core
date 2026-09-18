@@ -102,8 +102,12 @@ public static class BracketLocate
         return (AxisFamily)(int)family;
     }
 
-    public static string Format(Span span, bool preferCanonical = false) =>
-        RelationWireBoundary.Format(span.ToLegacyWire(), preferCanonical);
+    public static string Format(Span span, bool preferCanonical = false)
+    {
+        if (preferCanonical && BracketResolveBoundary.TryFormatCodeEdit(span.ToLegacyWire(), out var kindWire))
+            return kindWire;
+        return RelationWireBoundary.Format(span.ToLegacyWire(), preferCanonical);
+    }
 
     public static string SanitizeTextNeedle(string? raw) =>
         RelationWireBoundary.SanitizeTextNeedle(raw);
