@@ -87,13 +87,30 @@ public static class BracketLocate
             NestedAnchor: null,
             axes.TextNeedle,
             axes.TypeKey);
+
+        internal static Span FromNavAxes(NavResolveAxes axes) => new(
+            axes.File,
+            MemberKey: null,
+            LineStart: axes.Line,
+            LineEnd: axes.Line,
+            Family: "navigation",
+            Command: axes.Command,
+            Go: axes.Go);
     }
 
     public static Span Parse(string bracketOrInner)
     {
         if (BracketResolveBoundary.TryParseToAxes(bracketOrInner, out var axes, out _))
             return Span.FromAxes(axes);
-        return Span.FromLegacyWire(RelationWireBoundary.Parse(bracketOrInner));
+        if (BracketResolveBoundary.TryParseNav(bracketOrInner, out var nav, out _))
+            return Span.FromNavAxes(nav);
+
+        var legacy = RelationWireBoundary.Parse(bracketOrInner);
+        if (RelationWireBoundary.ClassifyFamily(legacy, out _) == BracketAxisFamily.Navigation
+            && NavResolveProjection.TryFromLegacyNav(legacy, out nav))
+            return Span.FromNavAxes(nav);
+
+        return Span.FromLegacyWire(legacy);
     }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
@@ -104,11 +121,18 @@ public static class BracketLocate
 
     public static string Format(Span span, bool preferCanonical = false)
     {
-        if (ClassifyFamily(span, out _) != AxisFamily.Navigation
-            && BracketResolveBoundary.TryFormatCodeEdit(span.ToLegacyWire(), out var kindWire))
+        var legacy = span.ToLegacyWire();
+        if (ClassifyFamily(span, out _) == AxisFamily.Navigation)
+        {
+            if (BracketResolveBoundary.TryFormatNav(legacy, out var navWire))
+                return navWire;
+            return RelationWireBoundary.Format(legacy, preferCanonical);
+        }
+
+        if (BracketResolveBoundary.TryFormatCodeEdit(legacy, out var kindWire))
             return kindWire;
 
-        return RelationWireBoundary.Format(span.ToLegacyWire(), preferCanonical);
+        return RelationWireBoundary.Format(legacy, preferCanonical);
     }
 
     public static string SanitizeTextNeedle(string? raw) =>
