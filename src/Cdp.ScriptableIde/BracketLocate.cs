@@ -90,7 +90,7 @@ public static class BracketLocate
 
         internal static Span FromNavAxes(NavResolveAxes axes) => new(
             axes.File,
-            MemberKey: null,
+            MemberKey: axes.Member,
             LineStart: axes.Line,
             LineEnd: axes.Line,
             Family: "navigation",
