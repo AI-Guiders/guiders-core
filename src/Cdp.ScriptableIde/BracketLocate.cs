@@ -104,8 +104,10 @@ public static class BracketLocate
 
     public static string Format(Span span, bool preferCanonical = false)
     {
-        if (preferCanonical && BracketResolveBoundary.TryFormatCodeEdit(span.ToLegacyWire(), out var kindWire))
+        if (ClassifyFamily(span, out _) != AxisFamily.Navigation
+            && BracketResolveBoundary.TryFormatCodeEdit(span.ToLegacyWire(), out var kindWire))
             return kindWire;
+
         return RelationWireBoundary.Format(span.ToLegacyWire(), preferCanonical);
     }
 
