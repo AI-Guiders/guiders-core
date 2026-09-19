@@ -130,8 +130,28 @@ public static class WorkspaceScopeResolution
         return null;
     }
 
-    private static string NormalizePathKey(string path) =>
-        path.Trim().Replace('/', '\\').TrimEnd('\\');
+    private static string NormalizePathKey(string path)
+    {
+        var trimmed = path.Trim();
+        if (trimmed.Length == 0)
+            return trimmed;
+
+        if (Path.IsPathRooted(trimmed)
+            || (trimmed.Length >= 2 && trimmed[1] == ':' && char.IsAsciiLetter(trimmed[0])))
+        {
+            try
+            {
+                return Path.GetFullPath(trimmed)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+            catch (Exception)
+            {
+                // fall through
+            }
+        }
+
+        return trimmed.Replace('/', '\\').TrimEnd('\\');
+    }
 
     private static bool IsPrefixPathMatch(string workspacePath, string mapKeyPath)
     {

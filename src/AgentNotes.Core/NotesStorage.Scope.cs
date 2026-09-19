@@ -183,8 +183,29 @@ public sealed partial class NotesStorage
         return null;
     }
 
-    private static string NormalizePathKey(string path) =>
-        path.Trim().Replace('/', '\\').TrimEnd('\\');
+    private static string NormalizePathKey(string path)
+    {
+        var trimmed = path.Trim();
+        if (trimmed.Length == 0)
+            return trimmed;
+
+        // Rooted map keys / workspace paths: canonicalize so D:/ and D:\ match.
+        if (Path.IsPathRooted(trimmed)
+            || (trimmed.Length >= 2 && trimmed[1] == ':' && char.IsAsciiLetter(trimmed[0])))
+        {
+            try
+            {
+                return Path.GetFullPath(trimmed)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+            catch (Exception)
+            {
+                // fall through to slash-normalize
+            }
+        }
+
+        return trimmed.Replace('/', '\\').TrimEnd('\\');
+    }
 
     private static string ResolveDtsDefaultSectionId(IReadOnlyDictionary<string, string> sections)
     {
