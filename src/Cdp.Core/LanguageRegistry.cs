@@ -16,7 +16,6 @@ public static class CdpLanguages
     public const string PowerShell = "powershell";
     public const string Fsharp = "fsharp";
     public const string Gdl = "gdl";
-    public const string Latex = "latex";
 
     public static bool IsAny(string? language) =>
         string.IsNullOrWhiteSpace(language)
@@ -82,7 +81,7 @@ public sealed class LanguageRegistry
 
     /// <summary>Built-in defaults matching historical enum + detector behaviour.</summary>
     public static LanguageRegistry CreateDefault() => new(
-        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi, CdpLanguages.PowerShell, CdpLanguages.Fsharp, CdpLanguages.Gdl, CdpLanguages.Latex],
+        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi, CdpLanguages.PowerShell, CdpLanguages.Fsharp, CdpLanguages.Gdl],
         aliases:
         [
             new("cs", CdpLanguages.Csharp),
