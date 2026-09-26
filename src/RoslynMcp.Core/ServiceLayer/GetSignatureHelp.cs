@@ -26,6 +26,7 @@ public static class GetSignatureHelp
             return ToolStepJson.Fail(Kind, $"solution/project not found: {solutionOrProjectPath}");
         if (string.IsNullOrWhiteSpace(filePath))
             return ToolStepJson.Fail(Kind, "file_path is required");
+        filePath = WorkspaceAnchorResolve.ResolveDocumentPath(solutionOrProjectPath, filePath);
         if (line < 1 || column < 1)
             return ToolStepJson.Fail(Kind, "line/column must be 1-based >= 1");
 

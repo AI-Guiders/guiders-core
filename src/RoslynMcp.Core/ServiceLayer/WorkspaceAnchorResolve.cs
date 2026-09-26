@@ -50,6 +50,20 @@ internal static class WorkspaceAnchorResolve
     /// ADR-0062 DesignTimeLazy: for slnx/slnf + file, open owning C# project only (fast Roslyn verbs).
     /// Session anchor may stay slnx; MSBuild key is the resolved csproj.
     /// </summary>
+    public static string ResolveDocumentPath(string sessionAnchor, string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return filePath;
+
+        if (Path.IsPathRooted(filePath))
+            return Path.GetFullPath(filePath);
+
+        if (TryLoadGraph(sessionAnchor, out var graph))
+            return Path.GetFullPath(Path.Combine(graph.SolutionDirectory, filePath));
+
+        return Path.GetFullPath(filePath);
+    }
+
     public static string ResolveMsBuildOpenPath(string sessionAnchor, string? filePath)
     {
         if (!IsMultiProjectAnchor(sessionAnchor))
@@ -58,8 +72,9 @@ internal static class WorkspaceAnchorResolve
         if (string.IsNullOrWhiteSpace(filePath))
             return sessionAnchor;
 
+        var fullFile = ResolveDocumentPath(sessionAnchor, filePath);
         var owned = global::DotNetWorkspace.Core.DotNetWorkspace.TryResolveOwningProject(
-            filePath,
+            fullFile,
             sessionAnchor,
             DotNetProjectKind.CSharp);
         return owned is not null ? owned.AbsolutePath : sessionAnchor;
