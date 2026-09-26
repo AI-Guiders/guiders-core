@@ -5,6 +5,42 @@ namespace AgentNotes.Core;
 
 public sealed partial class NotesStorage
 {
+    public string ReadSingleSection(string workspacePath, string sectionId)
+    {
+        if (string.IsNullOrWhiteSpace(sectionId))
+            throw new ArgumentException("section_id is required.");
+
+        var notes = Read(workspacePath);
+        if (string.IsNullOrWhiteSpace(notes))
+        {
+            return JsonSerializer.Serialize(new
+            {
+                ok = false,
+                section_id = sectionId,
+                error = "notes_empty"
+            }, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        var sections = ParseSections(notes);
+        if (!sections.TryGetValue(sectionId, out var content))
+        {
+            return JsonSerializer.Serialize(new
+            {
+                ok = false,
+                section_id = sectionId,
+                error = "section_not_found"
+            }, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        return JsonSerializer.Serialize(new
+        {
+            ok = true,
+            section_id = sectionId,
+            chars = content.Length,
+            content
+        }, new JsonSerializerOptions { WriteIndented = true });
+    }
+
     public string ReadHotContext(string workspacePath, string? activeScope)
     {
         var notes = Read(workspacePath);
