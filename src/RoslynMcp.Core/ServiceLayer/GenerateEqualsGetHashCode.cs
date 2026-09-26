@@ -151,10 +151,6 @@ public static class GenerateEqualsGetHashCode
             solution?.Workspace.Dispose();
             return $"# Generated Equals and GetHashCode for {className}\n# Paste into the class body. (Use insert_into_file: true to insert automatically.)\n\n{block}";
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

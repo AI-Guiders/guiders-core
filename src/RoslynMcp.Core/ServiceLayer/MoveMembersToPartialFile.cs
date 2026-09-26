@@ -203,10 +203,6 @@ public static class MoveMembersToPartialFile
 
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             workspace?.Dispose();

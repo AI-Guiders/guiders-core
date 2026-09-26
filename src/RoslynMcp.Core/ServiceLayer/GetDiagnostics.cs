@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -97,21 +96,6 @@ public static class GetDiagnostics
             severity = DiagnosticSeverity.Error;
 
         return (severity, false);
-    }
-
-    /// <summary>Парсит .slnx: возвращает полные пути к .csproj (относительные пути разрешаются от каталога slnx).</summary>
-    private static List<string> GetProjectPathsFromSlnx(string slnxPath)
-    {
-        var dir = Path.GetDirectoryName(slnxPath) ?? "";
-        var xml = XDocument.Load(slnxPath);
-        var projects = xml.Root?
-            .Elements("Project")
-            .Select(e => (string?)e.Attribute("Path"))
-            .Where(p => !string.IsNullOrWhiteSpace(p))
-            .Select(p => Path.GetFullPath(Path.Combine(dir, p!.Trim())))
-            .Where(File.Exists)
-            .ToList() ?? [];
-        return projects;
     }
 
     private static async Task<(int totalAfterPath, int excludedSeverityNone, int excludedSuppress)> CollectDiagnosticsFromSolution(
@@ -300,61 +284,21 @@ public static class GetDiagnostics
         var excludedSeverityNone = 0;
         var excludedSuppress = 0;
 
-        var ext = Path.GetExtension(solutionOrProjectPath);
-        if (string.Equals(ext, ".slnx", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            var projectPaths = GetProjectPathsFromSlnx(solutionOrProjectPath);
-            if (projectPaths.Count == 0)
-                return ToolStepJson.Fail(Kind, ".slnx contains no valid project paths or files not found");
-
-            // slnx: still per-project open (no single MSBuild solution object).
-            await MsBuildWorkspaceGate.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                foreach (var projectPath in projectPaths)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var workspace = MSBuildWorkspace.Create(RoslynMcpWorkspaceProperties.MsBuild);
-                    try
-                    {
-                        var solution = await WorkspaceOpen.OpenSolutionOrProjectAsync(workspace, projectPath, cancellationToken).ConfigureAwait(false);
-                        if (solution is not null)
-                        {
-                            var (t, n, s) = await CollectDiagnosticsFromSolution(workspace, solution, targetPath, allDiagnostics, cancellationToken).ConfigureAwait(false);
-                            totalAfterPath += t;
-                            excludedSeverityNone += n;
-                            excludedSuppress += s;
-                        }
-                    }
-                    finally
-                    {
-                        workspace.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-                MsBuildWorkspaceGate.Gate.Release();
-            }
+            var (t, n, s) = await MsBuildWorkspaceHost.RunAsync(
+                solutionOrProjectPath,
+                async (workspace, solution, ct) =>
+                    await CollectDiagnosticsFromSolution(workspace, solution, targetPath, allDiagnostics, ct)
+                        .ConfigureAwait(false),
+                cancellationToken).ConfigureAwait(false);
+            totalAfterPath += t;
+            excludedSeverityNone += n;
+            excludedSuppress += s;
         }
-        else
+        catch (InvalidOperationException ex)
         {
-            try
-            {
-                var (t, n, s) = await MsBuildWorkspaceHost.RunAsync(
-                    solutionOrProjectPath,
-                    async (workspace, solution, ct) =>
-                        await CollectDiagnosticsFromSolution(workspace, solution, targetPath, allDiagnostics, ct)
-                            .ConfigureAwait(false),
-                    cancellationToken).ConfigureAwait(false);
-                totalAfterPath += t;
-                excludedSeverityNone += n;
-                excludedSuppress += s;
-            }
-            catch (InvalidOperationException ex)
-            {
-                return ToolStepJson.Fail(Kind, ex.Message);
-            }
+            return ToolStepJson.Fail(Kind, ex.Message);
         }
 
         return FormatDiagnosticsPayload(

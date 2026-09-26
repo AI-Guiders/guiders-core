@@ -276,10 +276,6 @@ public static partial class RenameSymbol
                 return ToolStepJson.Ok(Kind, summary, OkData(summary, files));
             }
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return ToolStepJson.Fail(Kind, ".slnx format is not supported. Use .sln or open by .csproj.");
-        }
         finally
         {
             solution?.Workspace.Dispose();

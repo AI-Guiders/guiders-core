@@ -65,10 +65,6 @@ public static class SyncDependentUponPartials
                 sb.AppendLine("# Re-run with dry_run: false to write .csproj files.");
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             workspace?.Dispose();

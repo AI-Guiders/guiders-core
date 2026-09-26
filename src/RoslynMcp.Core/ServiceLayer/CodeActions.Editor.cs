@@ -221,10 +221,6 @@ public static partial class CodeActions
                 .ToList();
             return new RoslynEditorCodeActionsResult { Actions = items };
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx", StringComparison.OrdinalIgnoreCase))
-        {
-            return new RoslynEditorCodeActionsResult { Error = ".slnx format is not supported. Use .sln or .csproj." };
-        }
         finally
         {
             solution?.Workspace.Dispose();
@@ -269,10 +265,6 @@ public static partial class CodeActions
             }
 
             return new RoslynEditorApplyResult { Error = "code action produced no document changes." };
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx", StringComparison.OrdinalIgnoreCase))
-        {
-            return new RoslynEditorApplyResult { Error = ".slnx format is not supported. Use .sln or .csproj." };
         }
         finally
         {

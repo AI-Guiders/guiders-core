@@ -155,10 +155,6 @@ public static class ResolveBreakpoint
             sb.AppendLine().AppendLineInvariant($"Total: {results.Count} location(s). Use file:line to set breakpoint.");
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

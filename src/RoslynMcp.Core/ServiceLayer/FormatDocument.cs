@@ -123,10 +123,6 @@ public static class FormatDocument
 
             return ToolStepJson.Ok(Kind, "Would change (dry run).", data);
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return ToolStepJson.Fail(Kind, ".slnx format is not supported. Use .sln or .csproj.");
-        }
         finally
         {
             solution?.Workspace.Dispose();

@@ -139,10 +139,6 @@ public static class GenerateBaseClass
 
             return $"# Abstract base class generated: {name}\n# (pass output_file_path to write to disk)\n# Next: add to {typeSymbol.Name} `: {name}` and add override to the extracted members.\n\n{code}";
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();
