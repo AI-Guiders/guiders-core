@@ -9,7 +9,7 @@
     <AssemblyName>RoslynMcp.Core</AssemblyName>
     <Description>Shared Roslyn workspace layer for RoslynMcp (stdio MCP) and IDE hosts: code actions, rename, diagnostics, navigation.</Description>
     <PackageId>AIGuiders.RoslynMcp.Core</PackageId>
-    <Version>0.1.13</Version>
+    <Version>0.1.14</Version>
     <Authors>LonelySoul; AIGuiders</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>roslyn;mcp;csharp;refactoring;code-analysis</PackageTags>

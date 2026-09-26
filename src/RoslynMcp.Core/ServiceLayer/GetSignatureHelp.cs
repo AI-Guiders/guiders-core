@@ -29,10 +29,12 @@ public static class GetSignatureHelp
         if (line < 1 || column < 1)
             return ToolStepJson.Fail(Kind, "line/column must be 1-based >= 1");
 
+        var msBuildKey = WorkspaceAnchorResolve.ResolveMsBuildOpenPath(solutionOrProjectPath, filePath);
+
         try
         {
             return await MsBuildWorkspaceHost.RunAsync(
-                    solutionOrProjectPath,
+                    msBuildKey,
                     async (_, solution, ct) =>
                     {
                         var doc = FindDocument(solution, filePath);

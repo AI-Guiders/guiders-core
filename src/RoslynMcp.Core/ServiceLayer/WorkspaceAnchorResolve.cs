@@ -45,4 +45,23 @@ internal static class WorkspaceAnchorResolve
             .Where(static p => File.Exists(p.AbsolutePath))
             .ToList();
     }
+
+    /// <summary>
+    /// ADR-0062 DesignTimeLazy: for slnx/slnf + file, open owning C# project only (fast Roslyn verbs).
+    /// Session anchor may stay slnx; MSBuild key is the resolved csproj.
+    /// </summary>
+    public static string ResolveMsBuildOpenPath(string sessionAnchor, string? filePath)
+    {
+        if (!IsMultiProjectAnchor(sessionAnchor))
+            return sessionAnchor;
+
+        if (string.IsNullOrWhiteSpace(filePath))
+            return sessionAnchor;
+
+        var owned = global::DotNetWorkspace.Core.DotNetWorkspace.TryResolveOwningProject(
+            filePath,
+            sessionAnchor,
+            DotNetProjectKind.CSharp);
+        return owned is not null ? owned.AbsolutePath : sessionAnchor;
+    }
 }

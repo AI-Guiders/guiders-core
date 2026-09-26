@@ -32,10 +32,12 @@ public static class GetCompletions
         if (max <= 0) max = 40;
         if (max > 80) max = 80;
 
+        var msBuildKey = WorkspaceAnchorResolve.ResolveMsBuildOpenPath(solutionOrProjectPath, filePath);
+
         try
         {
             return await MsBuildWorkspaceHost.RunAsync(
-                    solutionOrProjectPath,
+                    msBuildKey,
                     async (_, solution, ct) =>
                     {
                         var doc = FindDocument(solution, filePath);

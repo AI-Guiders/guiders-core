@@ -25,6 +25,16 @@ internal static class WorkspaceOpen
             var opened = 0;
             foreach (var entry in projects)
             {
+                if (entry.Kind != DotNetProjectKind.CSharp)
+                    continue;
+
+                if (ProjectAlreadyLoaded(workspace, entry.AbsolutePath))
+                {
+                    solution = workspace.CurrentSolution;
+                    opened++;
+                    continue;
+                }
+
                 try
                 {
                     var project = await workspace.OpenProjectAsync(entry.AbsolutePath, cancellationToken: cancellationToken)
@@ -32,10 +42,10 @@ internal static class WorkspaceOpen
                     solution = project.Solution;
                     opened++;
                 }
-                catch (Exception ex) when (entry.Kind == DotNetProjectKind.FSharp)
+                catch (Exception ex) when (IsAlreadyInWorkspace(ex))
                 {
-                    // Roslyn MSBuild host is C#-centric; F# design-time is FCS (ADR-0061). Skip failed F# load.
-                    _ = ex;
+                    solution = workspace.CurrentSolution;
+                    opened++;
                 }
             }
 
@@ -50,4 +60,15 @@ internal static class WorkspaceOpen
             .ConfigureAwait(false);
         return single.Solution;
     }
+
+    static bool ProjectAlreadyLoaded(MSBuildWorkspace workspace, string projectPath)
+    {
+        var full = Path.GetFullPath(projectPath);
+        return workspace.CurrentSolution.Projects.Any(p =>
+            p.FilePath is { } fp
+            && string.Equals(Path.GetFullPath(fp), full, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static bool IsAlreadyInWorkspace(Exception ex) =>
+        ex.Message.Contains("already part of the workspace", StringComparison.OrdinalIgnoreCase);
 }
