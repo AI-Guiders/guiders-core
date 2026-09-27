@@ -2,7 +2,7 @@ namespace Cdp.ScriptableIde;
 
 /// <summary>
 /// Structured 0128 locate builder — agent surface without wire-string tax.
-/// Emits <c>[F:…;M:…;S:…;K:…]</c> via <see cref="ToWire"/> for harness parse.
+/// Emits <c>[Kind:CodeEdit; File:…; Member:…]</c> via <see cref="ToWire"/> for harness parse.
 /// </summary>
 public sealed class Bracket
 {

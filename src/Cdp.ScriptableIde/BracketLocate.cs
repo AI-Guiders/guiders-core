@@ -103,12 +103,33 @@ public static class BracketLocate
 
     public static Span Parse(string bracketOrInner)
     {
-        if (BracketResolveBoundary.TryParseToAxes(bracketOrInner, out var axes, out _))
+        var wire = bracketOrInner?.Trim() ?? "";
+        if (wire.Length == 0)
+            throw new ArgumentException("anchor wire is empty.");
+
+        if (IsDocTemplatePlaceholder(wire))
+            throw new ArgumentException(
+                "anchor is a doc template, not a wire — copy from find/peek, e.g. " +
+                "[Kind:CodeEdit; File:Program.cs; Member:Foo] (legacy [F:Program.cs;M:Foo] ok).");
+
+        if (BracketResolveBoundary.TryParseToAxes(wire, out var axes, out _))
             return Span.FromAxes(axes);
-        if (BracketResolveBoundary.TryParseNav(bracketOrInner, out var nav, out _))
+        if (BracketResolveBoundary.TryParseNav(wire, out var nav, out _))
             return Span.FromNavAxes(nav);
 
-        throw new ArgumentException("unsupported_wire");
+        throw new ArgumentException(
+            "unsupported_wire — use [Kind:CodeEdit; File:<path>; Member:<name>] or legacy [F:<path>;M:<member>].");
+    }
+
+    static bool IsDocTemplatePlaceholder(string wire)
+    {
+        if (wire.Contains('…', StringComparison.Ordinal))
+            return true;
+        if (wire.Equals("[F:;M:;K:]", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (wire.Contains("F:;M:;K:", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
