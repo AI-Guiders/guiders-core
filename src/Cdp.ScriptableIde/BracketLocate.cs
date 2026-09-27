@@ -110,7 +110,7 @@ public static class BracketLocate
         if (IsDocTemplatePlaceholder(wire))
             throw new ArgumentException(
                 "anchor is a doc template, not a wire — copy from find/peek, e.g. " +
-                "[Kind:CodeEdit; File:Program.cs; Member:Foo] (legacy [F:Program.cs;M:Foo] ok).");
+                "[Kind:CodeEdit; File:Program.cs; Member:Foo].");
 
         if (BracketResolveBoundary.TryParseToAxes(wire, out var axes, out _))
             return Span.FromAxes(axes);
@@ -118,7 +118,7 @@ public static class BracketLocate
             return Span.FromNavAxes(nav);
 
         throw new ArgumentException(
-            "unsupported_wire — use [Kind:CodeEdit; File:<path>; Member:<name>] or legacy [F:<path>;M:<member>].");
+            "unsupported_wire — use [Kind:CodeEdit; File:<path>; Member:<name>] (or Type:/Line:/Text: axes).");
     }
 
     static bool IsDocTemplatePlaceholder(string wire)
