@@ -7,6 +7,9 @@ public sealed class TaskCardIO
 {
     private readonly object _gate = new();
 
+    /// <summary>UTF-8 БЕЗ BOM: <c>Encoding.UTF8</c> при записи ставит BOM, а он ломает анкорные правила на первой строке.</summary>
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
 
     public void EnsureLayout(ResolvedStore resolved)
     {
@@ -56,7 +59,7 @@ public sealed class TaskCardIO
             Directory.CreateDirectory(dir);
         lock (_gate)
         {
-            File.WriteAllText(full, content ?? "", Encoding.UTF8);
+            File.WriteAllText(full, content ?? "", Utf8NoBom);
         }
     }
 
@@ -72,7 +75,7 @@ public sealed class TaskCardIO
             var dir = Path.GetDirectoryName(full);
             if (!string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
-            File.WriteAllText(full, next, Encoding.UTF8);
+            File.WriteAllText(full, next, Utf8NoBom);
             return next;
         }
     }

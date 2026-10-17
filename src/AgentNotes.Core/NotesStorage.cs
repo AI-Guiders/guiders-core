@@ -21,6 +21,13 @@ public sealed partial class NotesStorage
         @"(?m)^\s*l0_manifest\s*:\s*(?<path>\S+)\s*$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    /// <summary>
+    /// UTF-8 БЕЗ BOM. <c>Encoding.UTF8</c> при записи ставит BOM (EF BB BF), а BOM на первой строке
+    /// делает её невидимой для анкорных правил (в т.ч. маркеров секций и <c>public-cut</c>).
+    /// При чтении по-прежнему используется <c>Encoding.UTF8</c>: он BOM срезает, и это здесь нужно.
+    /// </summary>
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
     /// <summary>Hot notes path: TOML primary root (<c>--config</c>); else <c>AGENT_NOTES_FILE</c>; else <c>workspace_path/.cascade-ide/agent-notes.md</c>.</summary>
     public string GetNotesPath(string workspacePath)
     {
@@ -342,7 +349,7 @@ public sealed partial class NotesStorage
         var dir = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
-        File.WriteAllText(fullPath, content, Encoding.UTF8);
+        File.WriteAllText(fullPath, content, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
         return "OK";
     }
@@ -355,7 +362,7 @@ public sealed partial class NotesStorage
         var safeName = filePath.Replace('/', '-').Replace('\\', '-');
         var revisionName = $"{timestamp}-{NormalizeReason(reason)}-{safeName}-{ComputeShortHash(snapshotContent)}.md";
         var revisionPath = Path.Combine(revisionsDir, revisionName);
-        File.WriteAllText(revisionPath, snapshotContent, Encoding.UTF8);
+        File.WriteAllText(revisionPath, snapshotContent, Utf8NoBom);
     }
 
     public string AppendKnowledgeFile(string? knowledgePath, string filePath, string content, bool saveRevision = true, string? knowledgeRootId = null)
@@ -369,7 +376,7 @@ public sealed partial class NotesStorage
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
         var separator = existing.Length > 0 && !existing.EndsWith('\n') ? "\n" : "";
-        File.WriteAllText(fullPath, existing + separator + content, Encoding.UTF8);
+        File.WriteAllText(fullPath, existing + separator + content, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
         return "OK";
     }
@@ -385,7 +392,7 @@ public sealed partial class NotesStorage
         if (saveRevision && existing.Length > 0)
             WriteKnowledgeRevision(root, filePath, existing, "upsert");
         var next = SectionMarkup.UpsertBlock(existing, sectionId, content);
-        File.WriteAllText(fullPath, next, Encoding.UTF8);
+        File.WriteAllText(fullPath, next, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
         return "OK";
     }
@@ -417,7 +424,7 @@ public sealed partial class NotesStorage
         var before = existing[..start].TrimEnd('\r', '\n');
         var after = existing[(end + endMarker.Length)..].TrimStart('\r', '\n');
         var next = JoinBlocks(before, after);
-        File.WriteAllText(fullPath, next, Encoding.UTF8);
+        File.WriteAllText(fullPath, next, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
         return "OK";
     }
@@ -527,7 +534,7 @@ public sealed partial class NotesStorage
         var dir = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
-        File.WriteAllText(fullPath, normalized, Encoding.UTF8);
+        File.WriteAllText(fullPath, normalized, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
         return "OK";
     }
@@ -662,7 +669,7 @@ public sealed partial class NotesStorage
 
         Directory.CreateDirectory(dir);
         var tempPath = Path.Combine(dir, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
-        File.WriteAllText(tempPath, content, Encoding.UTF8);
+        File.WriteAllText(tempPath, content, Utf8NoBom);
         File.Move(tempPath, path, true);
     }
 
@@ -674,7 +681,7 @@ public sealed partial class NotesStorage
         var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
         var revisionName = $"{timestamp}-{NormalizeReason(reason)}-{ComputeShortHash(snapshotContent)}.md";
         var revisionPath = Path.Combine(revisionsDir, revisionName);
-        File.WriteAllText(revisionPath, snapshotContent, Encoding.UTF8);
+        File.WriteAllText(revisionPath, snapshotContent, Utf8NoBom);
     }
 
     private static string NormalizeReason(string reason)
