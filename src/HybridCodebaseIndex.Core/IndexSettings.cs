@@ -97,7 +97,7 @@ public sealed record IndexSettings(
     private static readonly string[] FallbackIndexedExtensions =
     [
         ".md", ".mdx", ".csproj", ".slnx", ".props", ".targets", ".toml", ".editorconfig", ".json", ".yml",
-        ".yaml", ".razor", ".css", ".scss", ".html", ".axaml", ".cs",
+        ".yaml", ".razor", ".css", ".scss", ".html", ".axaml", ".cs", ".ds",
     ];
 
     public static IndexSettings Default { get; } = new(
