@@ -72,7 +72,7 @@ public sealed class SolutionOrProjectPathResolverTests
             File.WriteAllText(Path.Combine(dir.FullName, "B.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\"></Project>");
 
             var ex = Assert.Throws<ArgumentException>(() => SolutionOrProjectPathResolver.Resolve(dir.FullName));
-            Assert.Contains("Multiple .csproj", ex.Message);
+            Assert.Contains("Multiple project files", ex.Message);
         }
         finally
         {
