@@ -18,6 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Sibling checkout: Cdp.ScriptableIde conditional ProjectReferences
+      # (../../..\guiders-platform) need platform source in CI; without it the
+      # mixed-version PackageReference fallback does not compile.
+      - uses: actions/checkout@v4
+        with:
+          repository: AI-Guiders/guiders-dotnet-platform
+          path: ../guiders-platform
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
