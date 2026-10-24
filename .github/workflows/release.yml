@@ -18,20 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Sibling checkout: Cdp.ScriptableIde conditional ProjectReferences
-      # (../../..\guiders-platform) need platform source in CI; without it the
-      # mixed-version PackageReference fallback does not compile.
-      - uses: actions/checkout@v4
-        with:
-          repository: AI-Guiders/guiders-dotnet-platform
-          path: guiders-platform
-
-      # Exists() conditions in csprojs expect the sibling NEXT TO the repo root
-      # (..\..\..\guiders-platform), which is outside GITHUB_WORKSPACE — bridge
-      # the in-workspace checkout with a symlink at the expected location.
-      - name: Platform sibling link
-        run: ln -s "$GITHUB_WORKSPACE/guiders-platform" "$(dirname "$GITHUB_WORKSPACE")/guiders-platform"
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
