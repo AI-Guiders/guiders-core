@@ -101,10 +101,6 @@ public static class FindUsages
                 sb.AppendLine().AppendLineInvariant($"Total: {count} reference(s)");
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or open by .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

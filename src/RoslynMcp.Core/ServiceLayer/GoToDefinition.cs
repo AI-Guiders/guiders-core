@@ -114,10 +114,6 @@ public static class GoToDefinition
             sb.AppendLine().AppendLineInvariant($"Total: {defLocations.Count} definition(s)");
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or open by .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

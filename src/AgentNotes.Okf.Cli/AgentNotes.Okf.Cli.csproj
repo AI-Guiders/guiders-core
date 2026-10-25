@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <RootNamespace>AgentNotes.Okf.Cli</RootNamespace>
+    <Description>CLI runner for the canon → OKF migration (KB ADR 026, M1/M2).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgentNotes.Okf\AgentNotes.Okf.csproj" />
+  </ItemGroup>
+
+</Project>

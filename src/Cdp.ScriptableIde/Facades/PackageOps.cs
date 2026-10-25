@@ -41,7 +41,7 @@ public static class PackageOps
         const string kind = "packages.list";
         plan = WithProjectOverride(plan, projectPath);
         var lang = ResolveLang(plan);
-        if (!TryResolveProject(plan, lang, out var project, out var err))
+        if (!TryResolvePackageAnchor(plan, lang, requireProjectFile: false, out var project, out var err))
             return FailRecord(bus, kind, err, lang);
 
         StepResponse result;
@@ -50,7 +50,8 @@ public static class PackageOps
         else if (lang == "typescript")
             result = await RunNpmAsync(kind, project, ["ls", "--depth", "0", "--json"], ct, lang).ConfigureAwait(false);
         else
-            result = await RunDotnetAsync(kind, project, ["list", project, "package"], ct, lang).ConfigureAwait(false);
+            result = await RunDotnetAsync(kind, project, ["list", project, "package", "--no-restore"], ct, lang)
+                .ConfigureAwait(false);
 
         bus.RecordLocal("packages", kind, ScriptArgs.From(new { project, language = lang }), result.ToJson(),
             skippedDryRun: bus.IsDryRun);
@@ -187,7 +188,7 @@ public static class PackageOps
         const string kind = "packages.outdated";
         plan = WithProjectOverride(plan, projectPath);
         var lang = ResolveLang(plan);
-        if (!TryResolveProject(plan, lang, out var project, out var err))
+        if (!TryResolvePackageAnchor(plan, lang, requireProjectFile: false, out var project, out var err))
             return FailRecord(bus, kind, err, lang);
 
         if (bus.IsDryRun)
@@ -199,7 +200,8 @@ public static class PackageOps
 
         StepResponse result = lang == "typescript"
             ? await RunNpmAsync(kind, project, ["outdated", "--json"], ct, lang, allowNonZero: true).ConfigureAwait(false)
-            : await RunDotnetAsync(kind, project, ["list", project, "package", "--outdated"], ct, lang).ConfigureAwait(false);
+            : await RunDotnetAsync(kind, project, ["list", project, "package", "--outdated", "--no-restore"], ct, lang)
+                .ConfigureAwait(false);
 
         bus.RecordLocal("packages", kind, ScriptArgs.From(new { project, language = lang }), result.ToJson());
         return result;
@@ -238,9 +240,20 @@ public static class PackageOps
         };
     }
 
-    public static bool TryResolveProject(PlanContext plan, string lang, out string project, out string error)
+    public static bool TryResolveProject(PlanContext plan, string lang, out string project, out string error) =>
+        TryResolvePackageAnchor(plan, lang, requireProjectFile: true, out project, out error);
+
+    /// <summary>
+    /// Resolve package CLI anchor. List/outdated accept .sln/.slnx; add/remove/update need a project file.
+    /// </summary>
+    public static bool TryResolvePackageAnchor(
+        PlanContext plan,
+        string lang,
+        bool requireProjectFile,
+        out string anchor,
+        out string error)
     {
-        project = "";
+        anchor = "";
         error = "";
         if (lang == "typescript")
         {
@@ -258,7 +271,7 @@ public static class PackageOps
                 return false;
             }
 
-            project = Path.GetDirectoryName(pkg)!;
+            anchor = Path.GetDirectoryName(pkg)!;
             return true;
         }
 
@@ -266,7 +279,7 @@ public static class PackageOps
         var path = plan.SolutionOrProjectPath;
         if (string.IsNullOrWhiteSpace(path))
         {
-            error = "No csharp project in session. cdp_open a .csproj (preferred) or .sln.";
+            error = "No csharp project in session. cdp_open a .csproj (preferred) or .sln/.slnx.";
             return false;
         }
 
@@ -274,15 +287,33 @@ public static class PackageOps
         if (path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             || path.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
         {
-            project = path;
+            if (!File.Exists(path))
+            {
+                error = $"Anchor not found: {path}";
+                return false;
+            }
+
+            anchor = path;
             return true;
         }
 
         if (path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)
             || path.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
         {
-            error = "packages.add/remove need a .csproj — open a project file or pass path= to Packages (session is .sln).";
-            return false;
+            if (requireProjectFile)
+            {
+                error = "packages.add/remove/update need a .csproj — open a project file or pass path= to Packages (session is solution).";
+                return false;
+            }
+
+            if (!File.Exists(path))
+            {
+                error = $"Anchor not found: {path}";
+                return false;
+            }
+
+            anchor = path;
+            return true;
         }
 
         error = $"Unsupported project anchor: {path}";

@@ -1,6 +1,6 @@
 # GUIDERS-CORE-0002: Package intelligence (L1)
 
-**Status:** accepted (2026-08-23)
+**Status:** Accepted (2026-08-23)
 
 ## Context
 

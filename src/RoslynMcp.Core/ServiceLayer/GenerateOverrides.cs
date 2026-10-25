@@ -177,10 +177,6 @@ public static class GenerateOverrides
             solution?.Workspace.Dispose();
             return $"# Generated overrides for {typeSymbol.Name} (base: {baseType.Name})\n# Paste into the class body. (Use insert_into_file: true to insert automatically.)\n\n{block}";
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

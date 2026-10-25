@@ -1,6 +1,6 @@
 # GUIDERS-CORE-0001: Monorepo bootstrap
 
-**Status:** accepted (2026-08-22)
+**Status:** Accepted (2026-08-22)
 
 ## Context
 

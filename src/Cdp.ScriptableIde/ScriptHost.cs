@@ -15,8 +15,13 @@ public static class ScriptHost
         .AddImports(
             "System",
             "System.IO",
+            "System.Collections.Generic",
+            "System.Linq",
+            "System.Text",
+            "System.Text.RegularExpressions",
             "System.Threading",
             "System.Threading.Tasks",
+            "System.Net.Http",
             "Cdp.ScriptableIde");
 
     public static async Task<ScriptReport> CheckAsync(string code, CancellationToken cancellationToken = default)

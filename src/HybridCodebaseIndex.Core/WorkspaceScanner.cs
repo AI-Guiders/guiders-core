@@ -36,7 +36,21 @@ internal static class WorkspaceScanner
             }
 
             foreach (var sd in subDirs)
+            {
+                // Reparse points (junction/symlink) — the parent tree already covers
+                // their content; following them double-walks and can cycle.
+                try
+                {
+                    if ((System.IO.File.GetAttributes(sd) & FileAttributes.ReparsePoint) != 0)
+                        continue;
+                }
+                catch
+                {
+                    continue;
+                }
+
                 stack.Push(sd);
+            }
 
             IEnumerable<string> files;
             try

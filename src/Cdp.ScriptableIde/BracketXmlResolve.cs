@@ -1,5 +1,5 @@
-using AIGuiders.Platform.Execution.Language.Xml.Anchors;
-using AIGuiders.Platform.Execution.LanguageIntelligence.Anchors;
+using AIGuiders.Platform.Execution.Language.Xml.Relations;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 
 namespace Cdp.ScriptableIde;
 
@@ -25,7 +25,7 @@ public static class BracketXmlResolve
         var ok = XmlBracketAnchorResolve.TryResolve(
             absoluteFilePath,
             sourceText,
-            span.ToPlatform(),
+            span.ToCodeEditAxes(),
             out var platform,
             out detail);
         if (!ok)

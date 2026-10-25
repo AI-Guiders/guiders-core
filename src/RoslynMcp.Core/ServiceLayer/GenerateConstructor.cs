@@ -158,10 +158,6 @@ public static class GenerateConstructor
             solution?.Workspace.Dispose();
             return $"# Generated constructor for {typeSymbol.Name}\n# Paste into the class body. (Use insert_into_file: true to insert automatically.)\n\n{ctorText}";
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

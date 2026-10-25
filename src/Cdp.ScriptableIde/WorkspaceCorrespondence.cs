@@ -12,7 +12,7 @@ public static class WorkspaceCorrespondence
 {
     public const string Schema = CorrespondenceSchema.V0;
 
-    public sealed record ForwardDoc(string Path, string Title);
+    public sealed record ForwardDoc(string Path, string Title, string? Abs = null, string? Kind = null);
 
     public sealed record ReverseAnchor(
         string DocPath,
@@ -46,6 +46,13 @@ public static class WorkspaceCorrespondence
         var platform = CorrespondenceResolver.TryResolve(absoluteFilePath, workspaceRootHint);
         return platform is null ? null : Map(platform);
     }
+    public static CorrespondenceDocResolve.Resolved TryResolveDoc(string workspaceRoot, string docRaw) =>
+        CorrespondenceDocResolve.TryResolve(workspaceRoot, docRaw);
+
+    /// <summary>forum 003 AddRelated: line-level merge into .cascade/workspace.toml (comments preserved).</summary>
+    public static CorrespondenceTomlWriter.Result AddRelated(string workspaceRoot, string key, string docRaw) =>
+        CorrespondenceTomlWriter.AddRelatedEntry(workspaceRoot, key, docRaw);
+
 
     public static IdeReport ToIdeReport(CodeAnchor anchor, Result? result)
     {
@@ -119,23 +126,23 @@ public static class WorkspaceCorrespondence
         p.FeatureLine,
         p.FeatureDocs,
         p.AdrLine,
-        p.ForwardDocs.Select(d => new ForwardDoc(d.Path, d.Title)).ToArray(),
-        p.ReverseAnchors.Select(MapReverse).ToArray(),
+        p.ForwardDocs.Select(d => new ForwardDoc(d.Path, d.Title, d.Abs, d.Kind)).ToArray(),
+        p.DocToCodeWitnesses.Select(MapReverse).ToArray(),
         p.ActiveLayers,
         p.TomlPath);
 
-    static ReverseAnchor MapReverse(AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor r) => new(
-        r.DocPath,
-        r.DocTitle,
-        r.Provenance,
-        r.Kind,
-        r.File,
-        r.LineStart,
-        r.LineEnd,
-        r.MemberKey,
-        r.Wire,
-        r.DocLineHint,
-        r.Excerpt);
+    static ReverseAnchor MapReverse(DocToCodeWitness w) => new(
+        w.DocPath,
+        w.DocTitle,
+        w.Provenance,
+        w.Kind,
+        w.File,
+        w.LineStart,
+        w.LineEnd,
+        w.MemberKey,
+        w.Wire,
+        w.DocLineHint,
+        w.Excerpt);
 
     static CorrespondenceResult MapToPlatform(Result r) => new(
         r.WorkspaceRoot,
@@ -143,12 +150,12 @@ public static class WorkspaceCorrespondence
         r.FeatureLine,
         r.FeatureDocs,
         r.AdrLine,
-        r.ForwardDocs.Select(d => new AIGuiders.Platform.Execution.Documentation.Correspondence.ForwardDoc(d.Path, d.Title)).ToArray(),
+        r.ForwardDocs.Select(d => new AIGuiders.Platform.Execution.Documentation.Correspondence.ForwardDoc(d.Path, d.Title, d.Abs, d.Kind)).ToArray(),
         r.ReverseAnchors.Select(MapReverseToPlatform).ToArray(),
         r.ActiveLayers,
         r.TomlPath);
 
-    static AIGuiders.Platform.Execution.Documentation.Correspondence.ReverseAnchor MapReverseToPlatform(ReverseAnchor r) => new(
+    static DocToCodeWitness MapReverseToPlatform(ReverseAnchor r) => new(
         r.DocPath,
         r.DocTitle,
         r.Provenance,

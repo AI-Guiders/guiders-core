@@ -60,8 +60,8 @@ internal static class McpResolvePathsDefaults
     private static class HardcodedFallback
     {
         internal static readonly (string WorkspaceScopeMapRelative, string ScopeAliasMapRelative) Pair = (
-            "work/local/workspace-scope-map-v1.md",
-            "work/local/scope-alias-map-v1.md");
+            "work/local/workspace-scope-map.md",
+            "work/local/scope-alias-map.md");
     }
 }
 

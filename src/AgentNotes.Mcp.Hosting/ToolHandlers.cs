@@ -10,6 +10,17 @@ public sealed class ToolHandlers
         _storage = storage;
     }
 
+    /// <summary>Primary knowledge root from TOML makes hot tools workspace-independent (CDP-ADR-0210 v0).</summary>
+    private static string ResolveWorkspacePath(IReadOnlyDictionary<string, JsonElement> args)
+    {
+        var ws = ToolArgs.OptionalString(args, "workspace_path");
+        if (!string.IsNullOrWhiteSpace(ws))
+            return ws;
+        if (AgentNotesRuntime.TryGetPrimaryKnowledgeRoot(out _))
+            return "";
+        throw new ArgumentException("workspace_path is required.");
+    }
+
     public bool IsWriteLikeTool(string name) =>
         name is
             "write_agent_notes" or
@@ -51,6 +62,7 @@ public sealed class ToolHandlers
             "read_knowledge_file" => ReadKnowledgeFile(args),
             "list_knowledge_files" => ListKnowledgeFiles(args),
             "knowledge_tags" => KnowledgeTags(args),
+            "recall_knowledge" => RecallKnowledge(args),
             "get_definition" => GetDefinition(args),
             "list_pack" => ListPack(args),
             "get_process" => GetProcess(args),
@@ -61,14 +73,14 @@ public sealed class ToolHandlers
 
     private string MemoryHealth(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var activeScope = ToolArgs.OptionalString(args, "active_scope");
         return _storage.MemoryHealth(workspacePath, activeScope);
     }
 
     private string RouteContext(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var query = ToolArgs.RequiredString(args, "query");
         var activeScope = ToolArgs.OptionalString(args, "active_scope");
         var maxSections = ToolArgs.GetIntOrDefault(args, "max_sections", 5, 1, 20);
@@ -78,27 +90,27 @@ public sealed class ToolHandlers
 
     private string Write(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var content = ToolArgs.RequiredString(args, "content");
         return _storage.Write(workspacePath, content);
     }
 
     private string Append(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var content = ToolArgs.RequiredString(args, "content");
         return _storage.Append(workspacePath, content);
     }
 
     private string Read(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         return _storage.Read(workspacePath);
     }
 
     private string UpsertSection(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var sectionId = ToolArgs.RequiredString(args, "section_id");
         var content = ToolArgs.RequiredString(args, "content");
 
@@ -110,7 +122,7 @@ public sealed class ToolHandlers
 
     private string DeleteSection(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var sectionId = ToolArgs.RequiredString(args, "section_id");
 
         if (!ToolArgs.IsValidSectionId(sectionId))
@@ -121,21 +133,21 @@ public sealed class ToolHandlers
 
     private string ListRevisions(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var limit = ToolArgs.GetIntOrDefault(args, "limit", 20, 1, 200);
         return _storage.ListRevisions(workspacePath, limit);
     }
 
     private string Rollback(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var revisionFile = ToolArgs.OptionalString(args, "revision_file");
         return _storage.Rollback(workspacePath, revisionFile);
     }
 
     private string Search(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var query = ToolArgs.RequiredString(args, "query");
         var limit = ToolArgs.GetIntOrDefault(args, "head_limit", 20, 1, 200);
         return _storage.Search(workspacePath, query, limit);
@@ -143,14 +155,14 @@ public sealed class ToolHandlers
 
     private string ReadHotContext(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var activeScope = ToolArgs.OptionalString(args, "active_scope");
         return _storage.ReadHotContext(workspacePath, activeScope);
     }
 
     private string ExtractFromArchive(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var query = ToolArgs.RequiredString(args, "query");
         var revisionFile = ToolArgs.OptionalString(args, "revision_file");
         var limit = ToolArgs.GetIntOrDefault(args, "head_limit", 10, 1, 100);
@@ -160,7 +172,7 @@ public sealed class ToolHandlers
 
     private string CompactHotContext(IReadOnlyDictionary<string, JsonElement> args)
     {
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         var apply = ToolArgs.GetBoolOrDefault(args, "apply", false);
         return _storage.CompactHotContext(workspacePath, apply);
     }
@@ -175,7 +187,7 @@ public sealed class ToolHandlers
             return _storage.ValidateKnowledgeSections(knowledgePath, filePath, knowledgeRootId);
         }
 
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         return _storage.ValidateSections(workspacePath);
     }
 
@@ -191,7 +203,7 @@ public sealed class ToolHandlers
             return _storage.NormalizeKnowledgeSections(knowledgePath, filePath, apply, saveRevision, knowledgeRootId);
         }
 
-        var workspacePath = ToolArgs.RequiredString(args, "workspace_path");
+        var workspacePath = ResolveWorkspacePath(args);
         return _storage.NormalizeSections(workspacePath, apply);
     }
 
@@ -278,6 +290,27 @@ public sealed class ToolHandlers
         return _storage.ListKnowledgeFiles(knowledgePath, subdir, knowledgeRootId);
     }
 
+    private string RecallKnowledge(IReadOnlyDictionary<string, JsonElement> args)
+    {
+        var query = ToolArgs.RequiredString(args, "query");
+        var layer = ToolArgs.OptionalString(args, "layer");
+        var limit = ToolArgs.GetIntOrDefault(args, "limit", 15, 1, 50);
+        var activeScope = ToolArgs.OptionalString(args, "active_scope");
+        var primaryProjectId = ToolArgs.OptionalString(args, "primary_project_id");
+        var scopeOnly = ToolArgs.GetBoolOrDefault(args, "scope_only", false);
+        var workspacePath = ToolArgs.OptionalString(args, "workspace_path");
+        if (string.IsNullOrWhiteSpace(workspacePath) && AgentNotesRuntime.TryGetPrimaryKnowledgeRoot(out _))
+            workspacePath = "";
+        return _storage.RecallKnowledge(
+            query,
+            layer,
+            limit,
+            activeScope,
+            primaryProjectId,
+            scopeOnly,
+            workspacePath);
+    }
+
     private string KnowledgeTags(IReadOnlyDictionary<string, JsonElement> args)
     {
         var knowledgePath = ToolArgs.OptionalKnowledgePath(args);
@@ -290,6 +323,9 @@ public sealed class ToolHandlers
         var ssotOnly = ToolArgs.GetBoolOrDefault(args, "ssot_only", false);
         var includeRelated = ToolArgs.GetBoolOrDefault(args, "include_related", true);
         var refresh = ToolArgs.GetBoolOrDefault(args, "refresh", false);
+        var activeScope = ToolArgs.OptionalString(args, "active_scope");
+        var primaryProjectId = ToolArgs.OptionalString(args, "primary_project_id");
+        var scopeOnly = ToolArgs.GetBoolOrDefault(args, "scope_only", false);
         return _storage.QueryKnowledgeTags(
             knowledgePath,
             tag,
@@ -300,7 +336,10 @@ public sealed class ToolHandlers
             query,
             ssotOnly,
             includeRelated,
-            refresh);
+            refresh,
+            activeScope,
+            primaryProjectId,
+            scopeOnly);
     }
 
     private string GetDefinition(IReadOnlyDictionary<string, JsonElement> args)

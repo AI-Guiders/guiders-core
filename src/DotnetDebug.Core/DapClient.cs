@@ -290,7 +290,19 @@ public sealed class DapClient : IAsyncDisposable
     public Task AttachAsync(int processId, CancellationToken cancellationToken = default) =>
         SendRequestAsync("attach", new Dictionary<string, object?> { ["processId"] = processId }, cancellationToken);
 
-    public async Task SetBreakpointsAsync(string sourcePath, IReadOnlyList<(int Line, string? Condition)> breakpoints, CancellationToken cancellationToken = default)
+    /// <summary>Поставить точки и забыть вердикт (совместимость: вызывающие, которым важен только факт отправки).</summary>
+    public Task SetBreakpointsAsync(string sourcePath, IReadOnlyList<(int Line, string? Condition)> breakpoints, CancellationToken cancellationToken = default) =>
+        SetBreakpointsWithVerdictsAsync(sourcePath, breakpoints, cancellationToken);
+
+    /// <summary>
+    /// Поставить точки и вернуть вердикт адаптера по каждой: связалась или нет.
+    /// Тело ответа DAP раньше выбрасывалось, из-за чего «запрос отправлен» было неотличимо от «точка связалась».
+    /// Пустой список точек снимает точки с файла (так адаптер и чистит набор).
+    /// </summary>
+    public async Task<IReadOnlyList<DapBreakpointVerdict>> SetBreakpointsWithVerdictsAsync(
+        string sourcePath,
+        IReadOnlyList<(int Line, string? Condition)> breakpoints,
+        CancellationToken cancellationToken = default)
     {
         var path = Path.GetFullPath(sourcePath);
         var bps = breakpoints.Select(b =>
@@ -300,11 +312,36 @@ public sealed class DapClient : IAsyncDisposable
                 d["condition"] = b.Condition;
             return d;
         }).ToList();
-        await SendRequestAsync("setBreakpoints", new Dictionary<string, object?>
+        var body = await SendRequestWithBodyAsync("setBreakpoints", new Dictionary<string, object?>
         {
             ["source"] = new Dictionary<string, object?> { ["path"] = path },
             ["breakpoints"] = bps
         }, cancellationToken).ConfigureAwait(false);
+        return ParseBreakpointVerdicts(body);
+    }
+
+    /// <summary>Разбор ответа setBreakpoints. Адаптер, который тела не вернул, даёт пустой список — это «вердикта нет», а не «всё связано».</summary>
+    static IReadOnlyList<DapBreakpointVerdict> ParseBreakpointVerdicts(JsonElement? body)
+    {
+        if (body is not { } root || root.ValueKind != JsonValueKind.Object ||
+            !root.TryGetProperty("breakpoints", out var array) || array.ValueKind != JsonValueKind.Array)
+            return Array.Empty<DapBreakpointVerdict>();
+
+        var verdicts = new List<DapBreakpointVerdict>();
+        foreach (var item in array.EnumerateArray())
+        {
+            var line = item.TryGetProperty("line", out var lineElement) && lineElement.TryGetInt32(out var parsedLine)
+                ? parsedLine
+                : 0;
+            var verified = item.TryGetProperty("verified", out var verifiedElement) && verifiedElement.ValueKind == JsonValueKind.True;
+            var message = item.TryGetProperty("message", out var messageElement) && messageElement.ValueKind == JsonValueKind.String
+                ? messageElement.GetString()
+                : null;
+            int? id = item.TryGetProperty("id", out var idElement) && idElement.TryGetInt32(out var parsedId) ? parsedId : null;
+            verdicts.Add(new DapBreakpointVerdict(line, verified, message, id));
+        }
+
+        return verdicts;
     }
 
     public Task SetExceptionBreakpointsAsync(IReadOnlyList<string> filters, CancellationToken cancellationToken = default) =>

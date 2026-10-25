@@ -499,10 +499,6 @@ public static partial class CodeActions
             sb.AppendLine().AppendLineInvariant($"Total: {actions.Count}. Use roslyn_apply_code_action with action_index (0-based). For code fixes, optional fix_all_scope: document | project | solution.");
             return sb.ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();
@@ -680,10 +676,6 @@ public static partial class CodeActions
                 }
             }
             return $"{docInfoApply}\nApplied: {chosen.Title} (no document changes).";
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported.";
         }
         finally
         {

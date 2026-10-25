@@ -61,10 +61,6 @@ public static class GetSolutionStructure
 
             return BuildSolutionStructureText(solutionOrProjectPath, solution, cancellationToken).ToString();
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

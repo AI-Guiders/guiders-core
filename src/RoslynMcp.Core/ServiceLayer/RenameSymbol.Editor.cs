@@ -135,10 +135,6 @@ public static partial class RenameSymbol
 
             return new RoslynEditorApplyResult { Changes = changes };
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx", StringComparison.OrdinalIgnoreCase))
-        {
-            return new RoslynEditorApplyResult { Error = ".slnx format is not supported. Use .sln or .csproj." };
-        }
         finally
         {
             solution?.Workspace.Dispose();

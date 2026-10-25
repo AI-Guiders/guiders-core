@@ -1,12 +1,12 @@
 #nullable enable
 
-using AIGuiders.Platform.Execution.LanguageIntelligence.Anchors;
-using AIGuiders.Platform.IntermediateRepresentation.Language;
+using AIGuiders.Platform.Execution.LanguageIntelligence;
+using AIGuiders.Platform.Execution.LanguageIntelligence.Relations;
 
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — SSOT: <see cref="BracketAnchorWire"/> / <see cref="BracketAnchorSpan"/> (platform).
+/// CDP compatibility façade — Kind-first parse via <see cref="BracketResolveBoundary"/> with doc-scan F/M/L fallback for code edit only.
 /// </summary>
 public static class BracketLocate
 {
@@ -34,9 +34,51 @@ public static class BracketLocate
         string? Command = null,
         string? Go = null,
         Span? NestedAnchor = null,
-        string? TextNeedle = null)
+        string? TextNeedle = null,
+        string? TypeKey = null)
     {
-        internal BracketAnchorSpan ToPlatform() => new(
+        internal static Span FromAxes(CodeEditResolveAxes axes) => new(
+            axes.File,
+            axes.MemberKey,
+            axes.LineStart,
+            axes.LineEnd,
+            axes.ScopeKind,
+            axes.ScopeIndex,
+            axes.Role,
+            axes.XmlPath,
+            axes.Attr,
+            Family: null,
+            Command: null,
+            Go: null,
+            NestedAnchor: null,
+            axes.TextNeedle,
+            axes.TypeKey);
+
+        internal static Span FromNavAxes(NavResolveAxes axes) => new(
+            axes.File,
+            MemberKey: axes.Member,
+            LineStart: axes.Line,
+            LineEnd: axes.Line,
+            Family: "navigation",
+            Command: axes.Command,
+            Go: axes.Go);
+
+        internal WireFamilyClassifier.Probe ToFamilyProbe() => new(
+            File,
+            MemberKey,
+            LineStart,
+            ScopeKind,
+            Role,
+            XmlPath,
+            Attr,
+            Family,
+            Command,
+            Go,
+            NestedAnchor?.ToFamilyProbe(),
+            TextNeedle,
+            TypeKey);
+
+        internal CodeEditResolveAxes ToCodeEditAxes() => new(
             File,
             MemberKey,
             LineStart,
@@ -46,41 +88,71 @@ public static class BracketLocate
             Role,
             XmlPath,
             Attr,
-            Family,
+            TextNeedle,
+            TypeKey);
+
+        internal NavResolveAxes ToNavAxes() => new(
+            File,
+            LineStart,
+            Column: null,
             Command,
             Go,
-            NestedAnchor?.ToPlatform(),
-            TextNeedle);
-
-        internal static Span FromPlatform(BracketAnchorSpan span) => new(
-            span.File,
-            span.MemberKey,
-            span.LineStart,
-            span.LineEnd,
-            span.ScopeKind,
-            span.ScopeIndex,
-            span.Role,
-            span.XmlPath,
-            span.Attr,
-            span.Family,
-            span.Command,
-            span.Go,
-            span.NestedAnchor is null ? null : FromPlatform(span.NestedAnchor),
-            span.TextNeedle);
+            Solution: null,
+            Member: MemberKey);
     }
 
-    public static Span Parse(string bracketOrInner) =>
-        Span.FromPlatform(BracketAnchorWire.Parse(bracketOrInner));
+    public static Span Parse(string bracketOrInner)
+    {
+        var wire = bracketOrInner?.Trim() ?? "";
+        if (wire.Length == 0)
+            throw new ArgumentException("anchor wire is empty.");
+
+        if (IsDocTemplatePlaceholder(wire))
+            throw new ArgumentException(
+                "anchor is a doc template, not a wire — copy from find/peek, e.g. " +
+                "[Kind:CodeEdit; File:Program.cs; Member:Foo].");
+
+        if (BracketResolveBoundary.TryParseToAxes(wire, out var axes, out _))
+            return Span.FromAxes(axes);
+        if (BracketResolveBoundary.TryParseNav(wire, out var nav, out _))
+            return Span.FromNavAxes(nav);
+
+        throw new ArgumentException(
+            "unsupported_wire — use [Kind:CodeEdit; File:<path>; Member:<name>] (or Type:/Line:/Text: axes).");
+    }
+
+    static bool IsDocTemplatePlaceholder(string wire)
+    {
+        if (wire.Contains('…', StringComparison.Ordinal))
+            return true;
+        if (wire.Equals("[F:;M:;K:]", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (wire.Contains("F:;M:;K:", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
 
     public static AxisFamily ClassifyFamily(Span span, out string? error)
     {
-        var family = BracketAnchorWire.ClassifyFamily(span.ToPlatform(), out error);
+        var family = WireFamilyClassifier.Classify(span.ToFamilyProbe(), out error);
         return (AxisFamily)(int)family;
     }
 
-    public static string Format(Span span, bool preferCanonical = false) =>
-        BracketAnchorWire.Format(span.ToPlatform(), preferCanonical);
+    public static string Format(Span span, bool preferCanonical = false)
+    {
+        _ = preferCanonical;
+        if (ClassifyFamily(span, out _) == AxisFamily.Navigation)
+        {
+            if (BracketResolveBoundary.TryFormatNav(span.ToNavAxes(), out var navWire))
+                return navWire;
+        }
+
+        if (BracketResolveBoundary.TryFormatCodeEdit(span.ToCodeEditAxes(), out var kindWire))
+            return kindWire;
+
+        throw new ArgumentException("unsupported_wire");
+    }
 
     public static string SanitizeTextNeedle(string? raw) =>
-        BracketAnchorWire.SanitizeTextNeedle(raw);
+        RelationWireBoundary.SanitizeTextNeedle(raw);
 }

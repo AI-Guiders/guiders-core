@@ -46,3 +46,16 @@
 *.pdb       -text
 *.so        -text
 *.dylib     -text
+
+* text=auto eol=lf
+*.sln text eol=crlf
+*.slnx text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.dll binary
+*.pdb binary
+*.nupkg binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary

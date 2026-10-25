@@ -139,10 +139,6 @@ public static class GenerateInterface
 
             return $"# Interface generated: {name}\n# (pass output_file_path to write to disk)\n\n{code}";
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("slnx") || ex.Message.Contains("Slnx"))
-        {
-            return "Error: .slnx format is not supported. Use .sln or .csproj.";
-        }
         finally
         {
             solution?.Workspace.Dispose();

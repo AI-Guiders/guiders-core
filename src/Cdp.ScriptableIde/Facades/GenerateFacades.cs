@@ -5,7 +5,7 @@ public sealed class GenerateFacade(IScriptToolBus bus, PlanContext plan)
 {
     public GenerateMemberOp Overrides => new(bus, plan, "roslyn_generate_overrides", "generate.overrides");
     public GenerateMemberOp Constructor => new(bus, plan, "roslyn_generate_constructor_from_members", "generate.constructor");
-    public GenerateMemberOp Equals => new(bus, plan, "roslyn_generate_equals_gethashcode", "generate.equals");
+    public new GenerateMemberOp Equals => new(bus, plan, "roslyn_generate_equals_gethashcode", "generate.equals");
 
     /// <summary>W3 — TestMethod entity (assertions accumulate until Apply).</summary>
     public TestMethodEntity TestMethod(string sutBracket, string name) => new(bus, plan, sutBracket, name);

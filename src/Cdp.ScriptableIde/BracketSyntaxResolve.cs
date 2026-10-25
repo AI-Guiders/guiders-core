@@ -1,6 +1,6 @@
 #nullable enable
 
-using AIGuiders.Platform.Execution.Language.CSharp.Anchors;
+using AIGuiders.Platform.Execution.Language.CSharp.Relations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Cdp.ScriptableIde;
 
 /// <summary>
-/// CDP compatibility façade — SSOT: <see cref="CSharpBracketAnchorResolve"/> (Language.CSharp.Anchors).
+/// CDP compatibility façade — SSOT: <see cref="CSharpBracketAnchorResolve"/> (Language.CSharp.Relations).
 /// </summary>
 public static class BracketSyntaxResolve
 {
@@ -34,7 +34,7 @@ public static class BracketSyntaxResolve
 
     public static bool TryResolve(string absoluteFilePath, BracketLocate.Span span, out TextRange range, out string detail)
     {
-        var ok = CSharpBracketAnchorResolve.TryResolve(absoluteFilePath, span.ToPlatform(), out var platformRange, out detail);
+        var ok = CSharpBracketAnchorResolve.TryResolve(absoluteFilePath, span.ToCodeEditAxes(), out var platformRange, out detail);
         range = ok ? TextRange.From(platformRange) : default!;
         return ok;
     }
@@ -46,10 +46,11 @@ public static class BracketSyntaxResolve
         out TextRange range,
         out string detail)
     {
+        var axes = span.ToCodeEditAxes();
         var ok = CSharpBracketAnchorResolve.TryResolve(
             absoluteFilePath,
             sourceText,
-            span.ToPlatform(),
+            axes,
             out var platformRange,
             out detail);
         range = ok ? TextRange.From(platformRange) : default!;
@@ -64,7 +65,7 @@ public static class BracketSyntaxResolve
     {
         var ok = CSharpBracketAnchorResolve.TryFindAttachTarget(
             absoluteFilePath,
-            span.ToPlatform(),
+            span.ToCodeEditAxes(),
             out var platformTarget,
             out detail);
         target = ok ? AttachTarget.From(platformTarget) : default!;
@@ -78,10 +79,11 @@ public static class BracketSyntaxResolve
         out AttachTarget target,
         out string detail)
     {
+        var axes = span.ToCodeEditAxes();
         var ok = CSharpBracketAnchorResolve.TryFindAttachTarget(
             absoluteFilePath,
             sourceText,
-            span.ToPlatform(),
+            axes,
             out var platformTarget,
             out detail);
         target = ok ? AttachTarget.From(platformTarget) : default!;
