@@ -140,6 +140,14 @@ public static class CanonMigrationProperties
     }
 
     [Fact]
+    public static void ForumThreadTypeFromPath()
+    {
+        Assert.Equal("Thread", CanonDocMigrator.TypeOverrideFor("personal/LinesForum/topics/004-voice-letter-pleyada/00-thread.md"));
+        Assert.Equal("Thread", CanonDocMigrator.TypeOverrideFor("topics/004-x/00-thread.md"));
+        Assert.Null(CanonDocMigrator.TypeOverrideFor("personal/LinesForum/README.md"));
+    }
+
+    [Fact]
     public static void TypeRegistryExamples()
     {
         Assert.Equal("Status", CanonDocMigrator.TypeFromFileName("status-knowledge-engineering.md"));

@@ -191,6 +191,34 @@ public static partial class CanonDocMigrator
         };
     }
 
+    /// <summary>Path-based type overrides (KB ADR 026 §9/§10): pack cards, LinesForum threads. Root-relative path with forward slashes.</summary>
+    public static string? TypeOverrideFor(string relativePath)
+    {
+        var normalized = relativePath.Replace('\\', '/');
+        if (normalized.Contains("/pack/definitions/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("definitions/", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Definition Card";
+        }
+
+        if (normalized.Contains("/pack/misconceptions/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("misconceptions/", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Misconception Card";
+        }
+
+        // LinesForum: topics/NNN-slug/00-thread.md → forum thread concept.
+        if ((normalized.Contains("/topics/", StringComparison.OrdinalIgnoreCase)
+             || normalized.StartsWith("topics/", StringComparison.OrdinalIgnoreCase))
+            && (normalized.EndsWith("/00-thread.md", StringComparison.OrdinalIgnoreCase)
+                || normalized == "00-thread.md"))
+        {
+            return "Thread";
+        }
+
+        return null;
+    }
+
     private static IReadOnlyList<string>? CollectCanonTags(string rest)
     {
         foreach (var line in rest.Replace("\r\n", "\n").Split('\n'))

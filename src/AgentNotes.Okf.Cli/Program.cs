@@ -4,10 +4,8 @@ namespace AgentNotes.Okf.Cli;
 
 /// <summary>
 /// Usage: AgentNotes.Okf.Cli &lt;root-dir&gt; [--write]
-/// Dry-run by default: prints per-file type/tags and whether the file would change.
-/// --write applies the migration in place, then verifies idempotence with a second pass.
-/// Skips .revisions/ and adr/. Files with a leading «НЕ ПУБЛИКОВАТЬ» line are migrated
-/// as contour:u (marker line removed; KB ADR 026 §8 — build filter is frontmatter-aware).
+/// Dry-run by default; --write applies in place and verifies idempotence with a second pass.
+/// Skips .revisions/ and adr/. Files with a leading «НЕ ПУБЛИКОВАТЬ» line migrate to contour:u (KB ADR 026 §8).
 /// </summary>
 public static class Program
 {
@@ -50,7 +48,13 @@ public static class Program
                 text = (text.StartsWith('\uFEFF') ? "\uFEFF" : string.Empty) + afterMarker;
             }
 
-            var migrated = CanonDocMigrator.Migrate(text, Path.GetFileName(file), TypeOverrideFor(rel), world, subworld, contour);
+            var migrated = CanonDocMigrator.Migrate(
+                text,
+                Path.GetFileName(file),
+                CanonDocMigrator.TypeOverrideFor(Path.GetFullPath(file).Replace('\\', '/')),
+                world,
+                subworld,
+                contour);
             if (migrated == text)
             {
                 unchanged++;
@@ -96,31 +100,5 @@ public static class Program
         return dash < 0
             ? (slug, null)
             : (slug[..dash], slug[(dash + 1)..]);
-    }
-
-    private static string? TypeOverrideFor(string relativePath)
-    {
-        var normalized = relativePath.Replace('\\', '/');
-        if (normalized.Contains("/pack/definitions/", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("definitions/", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Definition Card";
-        }
-
-        if (normalized.Contains("/pack/misconceptions/", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("misconceptions/", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Misconception Card";
-        }
-
-        // LinesForum (KB ADR 026 §9): topics/NNN-slug/00-thread.md → forum thread concept.
-        if (normalized.Contains("/LinesForum/topics/", StringComparison.OrdinalIgnoreCase)
-            && (normalized.EndsWith("/00-thread.md", StringComparison.OrdinalIgnoreCase)
-                || normalized.StartsWith("00-thread", StringComparison.OrdinalIgnoreCase)))
-        {
-            return "Thread";
-        }
-
-        return null;
     }
 }
