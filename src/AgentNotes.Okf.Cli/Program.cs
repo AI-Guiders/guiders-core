@@ -113,6 +113,14 @@ public static class Program
             return "Misconception Card";
         }
 
+        // LinesForum (KB ADR 026 §9): topics/NNN-slug/00-thread.md → forum thread concept.
+        if (normalized.Contains("/LinesForum/topics/", StringComparison.OrdinalIgnoreCase)
+            && (normalized.EndsWith("/00-thread.md", StringComparison.OrdinalIgnoreCase)
+                || normalized.StartsWith("00-thread", StringComparison.OrdinalIgnoreCase)))
+        {
+            return "Thread";
+        }
+
         return null;
     }
 }
