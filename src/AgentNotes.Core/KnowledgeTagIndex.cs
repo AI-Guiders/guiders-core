@@ -431,7 +431,7 @@ public static partial class KnowledgeTagIndex
             try { text = File.ReadAllText(full, Encoding.UTF8); }
             catch { continue; }
 
-            var tags = KnowledgeTags.ParseTagsLine(text);
+            var tags = KnowledgeTags.ParseTags(text);
             if (tags.Count == 0)
                 continue;
 

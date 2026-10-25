@@ -119,7 +119,7 @@ internal static class KnowledgeCorpusRecall
             if (!matched)
                 continue;
 
-            var tags = KnowledgeTags.ParseTagsLine(text);
+            var tags = KnowledgeTags.ParseTags(text);
             var ssot = KnowledgeTags.RoleTagsOf(tags).Contains(KnowledgeTags.RoleSsot, StringComparer.OrdinalIgnoreCase);
             var boost = ScopeBoost(rel, hints);
             hits.Add((boost, ssot, lineNo, rel, preview));

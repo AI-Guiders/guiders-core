@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AgentNotes.Core;
 
@@ -78,6 +77,8 @@ public sealed partial class NotesStorage
 
     private static string ResolveScope(string? requestedScope, IReadOnlyDictionary<string, string> sections, string workspacePath, IReadOnlyDictionary<string, string> aliases)
     {
+        // KB ADR 026 (M3): legacy hot-section fallbacks removed.
+        // Chain: explicit active_scope/[SCOPE:] → machine-local workspace scope map → default.
         if (!string.IsNullOrWhiteSpace(requestedScope))
             return NormalizeScope(requestedScope, aliases);
 
@@ -85,29 +86,15 @@ public sealed partial class NotesStorage
         if (!string.IsNullOrWhiteSpace(mappedScope))
             return NormalizeScope(mappedScope, aliases);
 
-        if (!sections.TryGetValue("active-scope", out var activeScopeContent))
-            return NormalizeScope("door-to-singularity", aliases);
-
-        var match = Regex.Match(activeScopeContent, @"current\s*:\s*(?<scope>[A-Za-z0-9._-]+)", RegexOptions.IgnoreCase);
-        var raw = match.Success
-            ? match.Groups["scope"].Value.Trim().ToLowerInvariant()
-            : "door-to-singularity";
-        return NormalizeScope(raw, aliases);
+        return "door-to-singularity";
     }
 
     private static string? TryResolveScopeFromWorkspaceMap(string workspacePath, IReadOnlyDictionary<string, string> sections)
     {
-        // Prefer machine-local map under canon (single source); else hot sections (legacy).
+        // Machine-local map under canon is the single source of truth (KB ADR 026, M3).
+        // Legacy hot-section maps (workspace-scope-map-v1 / scope-map-v1) are no longer read.
         var fromFile = TryLoadWorkspaceScopeMapFromWorkLocal();
-        var sectionPrimary = sections.TryGetValue("workspace-scope-map-v1", out var pm) ? pm : null;
-        var sectionLegacy = sections.TryGetValue("scope-map-v1", out var lm) ? lm : null;
-        var mapContent = !string.IsNullOrWhiteSpace(fromFile)
-            ? fromFile
-            : !string.IsNullOrWhiteSpace(sectionPrimary)
-                ? sectionPrimary
-                : !string.IsNullOrWhiteSpace(sectionLegacy)
-                    ? sectionLegacy
-                    : null;
+        var mapContent = fromFile;
 
         if (string.IsNullOrWhiteSpace(mapContent))
             return null;

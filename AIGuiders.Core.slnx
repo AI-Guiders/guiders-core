@@ -4,6 +4,8 @@
     <Project Path="src/AgentFindings.Core/AgentFindings.Core.csproj" />
     <Project Path="src/AgentNotes.Core/AgentNotes.Core.csproj" />
     <Project Path="src/AgentNotes.Mcp.Hosting/AgentNotes.Mcp.Hosting.csproj" />
+    <Project Path="src/AgentNotes.Okf/AgentNotes.Okf.csproj" />
+    <Project Path="src/AgentNotes.Okf.Cli/AgentNotes.Okf.Cli.csproj" />
     <Project Path="src/AgentTaskKnowledge.Core/AgentTaskKnowledge.Core.csproj" />
     <Project Path="src/Cdp.Core/Cdp.Core.csproj" />
     <Project Path="src/Cdp.Evidence/Cdp.Evidence.csproj" />
@@ -24,6 +26,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/AgentFailures.Core.Tests/AgentFailures.Core.Tests.csproj" />
     <Project Path="tests/AgentFindings.Core.Tests/AgentFindings.Core.Tests.csproj" />
+    <Project Path="tests/AgentNotes.Okf.Tests/AgentNotes.Okf.Tests.csproj" />
     <Project Path="tests/AgentTaskKnowledge.Core.Tests/AgentTaskKnowledge.Core.Tests.csproj" />
     <Project Path="tests/Cdp.PackageIntelligence.Tests/Cdp.PackageIntelligence.Tests.csproj" />
     <Project Path="tests/Cdp.Core.Tests/Cdp.Core.Tests.csproj" />
