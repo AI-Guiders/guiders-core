@@ -38,6 +38,9 @@ public static partial class CanonDocMigrator
     [GeneratedRegex(@"^-\s*superseded_by:\s*(?<v>.+?)\s*$")]
     private static partial Regex SupersededByBulletRegex();
 
+    [GeneratedRegex(@"^(WORK-)?(CDP|ANUI|CASA|GUIDERS)-ADR-", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex AdrMirrorRegex();
+
     private static (IReadOnlyList<string> Supersedes, IReadOnlyList<string> SupersededBy) CollectLifecycle(string rest)
     {
         var sup = new List<string>();
@@ -167,12 +170,20 @@ public static partial class CanonDocMigrator
             return "Index";
         }
 
+        // Product ADR mirrors (CDP-/ANUI-/CASA-/GUIDERS-ADR-…) → ADR.
+        if (AdrMirrorRegex().IsMatch(name))
+        {
+            return "ADR";
+        }
+
         var first = name.Split('-')[0];
         return first.ToLowerInvariant() switch
         {
             "status" => "Status",
             "playbook" => "Playbook",
-            "kb" => "KB",
+            "kb" => name.Contains("evidence", StringComparison.OrdinalIgnoreCase)
+                ? "Evidence Card"
+                : "KB",
             "matrix" => name.Contains("do-not-transfer", StringComparison.OrdinalIgnoreCase)
                 ? "Do-Not-Transfer Matrix"
                 : name.Contains("routing", StringComparison.OrdinalIgnoreCase) ? "Routing Matrix" : "Transfer Matrix",
@@ -187,14 +198,21 @@ public static partial class CanonDocMigrator
             "book" => "Book",
             "digest" => "Digest",
             "template" => "Template",
-            _ => "Note",
+            "handoff" => "Handoff",
+            "glossary" => "Glossary",
+            "maintenance" => "Maintenance Contract",
+            _ => name.Contains("incarnation", StringComparison.OrdinalIgnoreCase)
+                ? "Incarnation"
+                : name.Contains("diary", StringComparison.OrdinalIgnoreCase) ? "Diary" : "Note",
         };
     }
 
-    /// <summary>Path-based type overrides (KB ADR 026 §9/§10): pack cards, LinesForum threads. Root-relative path with forward slashes.</summary>
+    /// <summary>Path-based type overrides (KB ADR 026 §9/§10): pack cards, LinesForum, project cards, machine maps. Root-relative path with forward slashes.</summary>
     public static string? TypeOverrideFor(string relativePath)
     {
         var normalized = relativePath.Replace('\\', '/');
+
+        // Pack cards.
         if (normalized.Contains("/pack/definitions/", StringComparison.OrdinalIgnoreCase)
             || normalized.StartsWith("definitions/", StringComparison.OrdinalIgnoreCase))
         {
@@ -207,7 +225,7 @@ public static partial class CanonDocMigrator
             return "Misconception Card";
         }
 
-        // LinesForum: topics/NNN-slug/00-thread.md → forum thread concept.
+        // LinesForum: topics/NNN-slug/00-thread.md → forum thread; topics/index.md stays the reserved listing.
         if ((normalized.Contains("/topics/", StringComparison.OrdinalIgnoreCase)
              || normalized.StartsWith("topics/", StringComparison.OrdinalIgnoreCase))
             && (normalized.EndsWith("/00-thread.md", StringComparison.OrdinalIgnoreCase)
@@ -216,8 +234,85 @@ public static partial class CanonDocMigrator
             return "Thread";
         }
 
+        // Machine-local resolve maps (OQ-9): dictionary bodies stay untouched, only the type is declared.
+        if (normalized.Contains("/work/local/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("work/local/", StringComparison.OrdinalIgnoreCase))
+        {
+            if (normalized.EndsWith("/workspace-scope-map.md", StringComparison.OrdinalIgnoreCase)
+                || normalized == "workspace-scope-map.md")
+            {
+                return "Scope Map";
+            }
+
+            if (normalized.EndsWith("/scope-alias-map.md", StringComparison.OrdinalIgnoreCase)
+                || normalized == "scope-alias-map.md")
+            {
+                return "Scope Alias Map";
+            }
+
+            if (normalized.EndsWith("/active-scope.md", StringComparison.OrdinalIgnoreCase)
+                || normalized == "active-scope.md")
+            {
+                return "State";
+            }
+        }
+
+        // Project cards: work/projects/<scope>/<project-id>/README.md (hub README directly under projects/ stays Index).
+        var wp = normalized.IndexOf("/work/projects/", StringComparison.OrdinalIgnoreCase);
+        if (wp >= 0 || normalized.StartsWith("work/projects/", StringComparison.OrdinalIgnoreCase))
+        {
+            var rest = normalized[(wp >= 0 ? wp + "/work/projects/".Length : "work/projects/".Length)..];
+            if (rest.EndsWith("/README.md", StringComparison.OrdinalIgnoreCase) && rest.Count(c => c == '/') == 2)
+            {
+                return "Project Card";
+            }
+
+            if (normalized.Contains("/subprojects/", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Sub-Project Card";
+            }
+        }
+
+        // Assistant lines: <line>/README.md is the line card (hub README under assistantLines/ root stays Index).
+        var al = normalized.IndexOf("/assistantLines/", StringComparison.OrdinalIgnoreCase);
+        if (al >= 0 || normalized.StartsWith("assistantLines/", StringComparison.OrdinalIgnoreCase))
+        {
+            var rest = normalized[(al >= 0 ? al + "/assistantLines/".Length : "assistantLines/".Length)..];
+            if (rest.EndsWith("/README.md", StringComparison.OrdinalIgnoreCase) && rest.Count(c => c == '/') == 1)
+            {
+                return "Agent Line";
+            }
+        }
+
+        if (normalized.Contains("/agent-harness-field-reports/", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Field Report";
+        }
+
+        if (normalized.Contains("/recognition-history/", StringComparison.OrdinalIgnoreCase)
+            && normalized.EndsWith("/README.md", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Recognition Map";
+        }
+
+        // Well-known META contracts (§9: Meta Contract).
+        if (MetaContractNames.Contains(Path.GetFileName(normalized).ToLowerInvariant())
+            && normalized.Contains("/META/", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Meta Contract";
+        }
+
         return null;
     }
+
+    private static readonly HashSet<string> MetaContractNames = new(StringComparer.Ordinal)
+    {
+        "environment-axioms.md",
+        "integrity-core.md",
+        "integrity-post-spec.md",
+        "awareness-as-countermeasure.md",
+        "provenance-contract.md",
+    };
 
     private static IReadOnlyList<string>? CollectCanonTags(string rest)
     {
