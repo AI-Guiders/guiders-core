@@ -148,6 +148,19 @@ public static class CanonMigrationProperties
     }
 
     [Fact]
+    public static void TableHeaderIsNotDescription()
+    {
+        var doc = "# Темы LinesForum\n\n| # | Тема | Статус |\n|---|---|---|\n| 1 | чартер | pinned |\n\nТекст после таблицы.\n";
+        var migrated = CanonDocMigrator.Migrate(doc, "index.md");
+        var yamlEnd = migrated.IndexOf("\n---\n", StringComparison.Ordinal);
+        var fm = OkfFrontmatter.TryParseYaml(migrated[3..yamlEnd]);
+
+        Assert.NotNull(fm);
+        Assert.Equal("Index", fm!.Type);
+        Assert.Equal("Текст после таблицы.", fm.Description);
+    }
+
+    [Fact]
     public static void TypeRegistryExamples()
     {
         Assert.Equal("Status", CanonDocMigrator.TypeFromFileName("status-knowledge-engineering.md"));

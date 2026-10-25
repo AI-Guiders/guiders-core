@@ -261,6 +261,7 @@ public static partial class CanonDocMigrator
         {
             var t = line.Trim().TrimStart('\uFEFF').Trim();
             if (t.Length == 0 || t.StartsWith('#') || t.StartsWith("<!--", StringComparison.Ordinal)
+                || t.StartsWith('|') || t.StartsWith("---|", StringComparison.Ordinal)
                 || CanonTagLine.TryParse(t, out _)
                 || IsSpeechSituationLine(t) || IsVerifiedOnlyLine(t) || IsStatusMetaLine(t))
             {
