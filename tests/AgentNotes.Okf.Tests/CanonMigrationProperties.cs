@@ -172,9 +172,7 @@ public static class CanonMigrationProperties
         Assert.Equal("Index", CanonDocMigrator.TypeFromFileName("README.md"));
         Assert.Equal("Note", CanonDocMigrator.TypeFromFileName("world-modeling-playbook.md"));
         Assert.Equal("Evidence Card", CanonDocMigrator.TypeFromFileName("kb-laozi-mawangdui-evidence.md"));
-        Assert.Equal("ADR", CanonDocMigrator.TypeFromFileName("CDP-ADR-0206-habitat-integrity-subsystem.md"));
-        Assert.Equal("ADR", CanonDocMigrator.TypeFromFileName("ANUI-ADR-0002-foreign-ingest-one-way.md"));
-        Assert.Equal("Handoff", CanonDocMigrator.TypeFromFileName("handoff-line-dsh-2026-09-15.md"));
+                Assert.Equal("Handoff", CanonDocMigrator.TypeFromFileName("handoff-line-dsh-2026-09-15.md"));
         Assert.Equal("Incarnation", CanonDocMigrator.TypeFromFileName("lyra-incarnation-2026-08-25-guiders-ui-adr.md"));
         Assert.Equal("Diary", CanonDocMigrator.TypeFromFileName("lyra-diary-2026-08-20-jupiter-blur-orbit.ru.md"));
         Assert.Equal("Project Card", CanonDocMigrator.TypeOverrideFor("work/projects/door-to-singularity/dash-spec/README.md"));

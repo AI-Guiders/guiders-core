@@ -41,6 +41,22 @@ public static partial class CanonDocMigrator
     [GeneratedRegex(@"^(WORK-)?(CDP|ANUI|CASA|GUIDERS)-ADR-", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex AdrMirrorRegex();
 
+    /// <summary>
+    /// Old M2 defaults (Note/KB/Index) were produced by the weaker first-pass heuristic — the refined
+    /// name heuristic may upgrade them. Authored/exotic types are preserved as-is.
+    /// </summary>
+    private static string? UpgradeHeuristicType(string? existingType, string fileName)
+    {
+        if (existingType is null)
+        {
+            return TypeFromFileName(fileName);
+        }
+
+        return existingType is "Note" or "KB" or "Index"
+            ? TypeFromFileName(fileName)
+            : existingType;
+    }
+
     private static (IReadOnlyList<string> Supersedes, IReadOnlyList<string> SupersededBy) CollectLifecycle(string rest)
     {
         var sup = new List<string>();
@@ -139,7 +155,8 @@ public static partial class CanonDocMigrator
 
         var fm = new OkfFrontmatter
         {
-            Type = typeOverride ?? existing?.Type ?? TypeFromFileName(fileName),
+            Type = typeOverride
+                ?? UpgradeHeuristicType(existing?.Type, fileName),
             Title = title,
             Description = description,
             Tags = tags,
@@ -168,12 +185,6 @@ public static partial class CanonDocMigrator
         if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase) || name.Equals("index.md", StringComparison.OrdinalIgnoreCase))
         {
             return "Index";
-        }
-
-        // Product ADR mirrors (CDP-/ANUI-/CASA-/GUIDERS-ADR-…) → ADR.
-        if (AdrMirrorRegex().IsMatch(name))
-        {
-            return "ADR";
         }
 
         var first = name.Split('-')[0];
