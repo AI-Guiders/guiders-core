@@ -60,7 +60,7 @@ public static class IgniteShellBridge
     {
         if (string.IsNullOrWhiteSpace(armId))
             return json;
-        pretty ??= new JsonSerializerOptions { WriteIndented = true };
+        pretty ??= new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         try
         {
             var node = JsonNode.Parse(json)?.AsObject();

@@ -5,9 +5,8 @@ namespace AgentNotes.Core;
 /// <summary>CDP-ADR-0218: unified KB recall — corpus (resolve/lookup/search) then hot notes.</summary>
 public static class KnowledgeRecallFacade
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions JsonOptions = new(AigJson.Indented)
     {
-        WriteIndented = true,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     };
 

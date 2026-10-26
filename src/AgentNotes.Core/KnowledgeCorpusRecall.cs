@@ -6,7 +6,7 @@ namespace AgentNotes.Core;
 /// <summary>CDP-ADR-0210: federated corpus recall helpers (scope-first rank, substring search).</summary>
 internal static class KnowledgeCorpusRecall
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = AigJson.Indented;
 
     internal sealed record RecallHints(string? ResolvedScope, string? PrimaryProjectId, bool ScopeOnly);
 

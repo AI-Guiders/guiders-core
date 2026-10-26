@@ -18,7 +18,7 @@ public sealed partial class NotesStorage
                 ok = false,
                 section_id = sectionId,
                 error = "notes_empty"
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, AigJson.Indented);
         }
 
         var sections = ParseSections(notes);
@@ -29,7 +29,7 @@ public sealed partial class NotesStorage
                 ok = false,
                 section_id = sectionId,
                 error = "section_not_found"
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, AigJson.Indented);
         }
 
         return JsonSerializer.Serialize(new
@@ -38,7 +38,7 @@ public sealed partial class NotesStorage
             section_id = sectionId,
             chars = content.Length,
             content
-        }, new JsonSerializerOptions { WriteIndented = true });
+        }, AigJson.Indented);
     }
 
     public string ReadHotContext(string workspacePath, string? activeScope)
@@ -78,7 +78,7 @@ public sealed partial class NotesStorage
             content = JoinBlocks(blocks.ToArray()).TrimEnd('\n')
         };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     public string MemoryHealth(string workspacePath, string? activeScope)
@@ -174,7 +174,7 @@ public sealed partial class NotesStorage
             recommendations
         };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     /// <summary>Hot-context section sizes for AgentNotesStatus <c>GET /hot-preview</c> (read-only JSON).</summary>
@@ -227,7 +227,7 @@ public sealed partial class NotesStorage
                 .ToArray()
         };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     public string RouteContext(
@@ -244,7 +244,7 @@ public sealed partial class NotesStorage
                 query,
                 selected = Array.Empty<object>(),
                 assembled_context = ""
-            }, new JsonSerializerOptions { WriteIndented = true });
+            }, AigJson.Indented);
 
         var sections = ParseSections(notes);
         var scopeAliases = LoadScopeAliasesMerged();
@@ -328,7 +328,7 @@ public sealed partial class NotesStorage
             assembled_context = assembled.ToString().TrimEnd('\n')
         };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     public string ExtractFromArchive(string workspacePath, string query, string? revisionFile, int limit, int contextLines)
@@ -394,7 +394,7 @@ public sealed partial class NotesStorage
             matches
         };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     public string CompactHotContext(string workspacePath, bool apply)
@@ -411,7 +411,7 @@ public sealed partial class NotesStorage
                 content = compacted.TrimEnd('\n')
             };
 
-            return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(payload, AigJson.Indented);
         }
 
         return SaveWithRevision(notesPath, compacted, "compact-hot-context");

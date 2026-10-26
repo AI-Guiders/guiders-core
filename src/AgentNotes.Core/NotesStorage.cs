@@ -324,7 +324,7 @@ public sealed partial class NotesStorage
     private void InvalidateKnowledgeTagIndex(string repoRoot) =>
         KnowledgeTagIndex.Invalidate(Path.Combine(repoRoot, KnowledgeDirName));
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = AigJson.Indented;
 
     public string WriteKnowledgeFile(string? knowledgePath, string filePath, string content, bool saveRevision = true, string? knowledgeRootId = null, bool allowShrink = false)
     {
@@ -493,7 +493,7 @@ public sealed partial class NotesStorage
                 before = SectionMarkup.Analyze(existing),
                 after = SectionMarkup.Analyze(normalized),
                 content = normalized.TrimEnd('\n')
-            }, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            }, AigJson.IndentedSnakeCase);
         }
 
         if (!changed)
@@ -524,7 +524,7 @@ public sealed partial class NotesStorage
                 before = SectionMarkup.Analyze(existing),
                 after = SectionMarkup.Analyze(normalized),
                 content = normalized.TrimEnd('\n')
-            }, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            }, AigJson.IndentedSnakeCase);
         }
 
         if (!changed)
@@ -561,7 +561,7 @@ public sealed partial class NotesStorage
             })
             .ToArray();
 
-        return JsonSerializer.Serialize(revisions, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(revisions, AigJson.Indented);
     }
 
     public string Rollback(string workspacePath, string? revisionFile)
@@ -632,7 +632,7 @@ public sealed partial class NotesStorage
                 matches = returned
             };
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
     private string SaveWithRevision(string notesPath, string newContent, string reason)

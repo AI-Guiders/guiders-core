@@ -162,7 +162,7 @@ public static partial class CanonDocMigrator
             Tags = tags,
             Language = fileName.EndsWith(".ru.md", StringComparison.OrdinalIgnoreCase)
                 ? existing?.Language ?? "ru"
-                : existing?.Language,
+                : existing?.Language ?? DetectScriptLanguage(rest),
             World = world ?? existing?.World,
             Subworld = subworld ?? existing?.Subworld,
             Contour = contourOverride ?? existing?.Contour,
@@ -452,6 +452,29 @@ public static partial class CanonDocMigrator
 
     private static string SanitizeScalar(string value)
         => value.Replace("\r", " ").Replace("\n", " ").Replace("\uFEFF", string.Empty).Trim();
+
+    /// <summary>
+    /// Script-based language detection for explicit frontmatter marking (KB ADR 026 §3; P4: machines
+    /// need the language before loading the body — CJK tokenization, translation fallbacks).
+    /// Cyrillic-dominant → ru; significant CJK → zh (evidence cards quoting classical Chinese);
+    /// otherwise en when Latin present. Code identifiers don't outweigh prose: 30+ Cyrillic chars wins.
+    /// </summary>
+    private static string? DetectScriptLanguage(string body)
+    {
+        var cyr = 0;
+        var cjk = 0;
+        var latin = 0;
+        foreach (var c in body)
+        {
+            if (c is >= '\u0400' and <= '\u04FF') cyr++;
+            else if (c is >= '\u4E00' and <= '\u9FFF') cjk++;
+            else if (c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z')) latin++;
+        }
+
+        if (cjk >= 50) return "zh";
+        if (cyr >= 30) return "ru";
+        return latin > 0 ? "en" : null;
+    }
 
     private static string? FindVerifiedDate(string rest)
     {

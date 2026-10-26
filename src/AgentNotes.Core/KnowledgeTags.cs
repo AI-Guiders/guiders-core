@@ -128,7 +128,7 @@ public static partial class KnowledgeTags
     }
 
     public static string ToJson(object payload) =>
-        JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        JsonSerializer.Serialize(payload, AigJson.Indented);
 
     private static IEnumerable<string> SplitFlowList(string inner)
         => inner.Split(',').Select(t => t.Trim()).Where(t => t.Length > 0);
