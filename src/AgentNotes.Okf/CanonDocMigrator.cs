@@ -160,9 +160,7 @@ public static partial class CanonDocMigrator
             Title = title,
             Description = description,
             Tags = tags,
-            Language = fileName.EndsWith(".ru.md", StringComparison.OrdinalIgnoreCase)
-                ? existing?.Language ?? "ru"
-                : existing?.Language ?? DetectScriptLanguage(rest),
+            Language = existing?.Language ?? DetectScriptLanguage(rest),
             World = world ?? existing?.World,
             Subworld = subworld ?? existing?.Subworld,
             Contour = contourOverride ?? existing?.Contour,
