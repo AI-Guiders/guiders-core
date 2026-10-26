@@ -74,6 +74,9 @@ public sealed record OkfFrontmatter
     /// <summary>OKF trust family: <c>Проверено:</c> provenance.</summary>
     public OkfVerified? Verified { get; init; }
 
+    /// <summary>Profile: epistemic basis lifted from card bodies (P-KB-2026-10-26-01 P2; факт|inference|hypothesis|synthesis|…).</summary>
+    public string? Epistemic { get; init; }
+
     /// <summary>Profile: speech situation (structured, from canon <c>**Speech situation**</c> lines).</summary>
     public OkfSpeechSituation? SpeechSituation { get; init; }
 
@@ -129,6 +132,11 @@ public sealed record OkfFrontmatter
             sb.Append("verified:").AppendLine()
               .Append("  - by: ").Append(QuoteIfNeeded(Verified.By)).AppendLine()
               .Append("    at: ").Append(QuoteIfNeeded(Verified.At)).AppendLine();
+        }
+
+        if (Epistemic is not null)
+        {
+            AppendScalar(sb, "epistemic", Epistemic);
         }
 
         if (World is not null)
@@ -219,6 +227,7 @@ public sealed record OkfFrontmatter
         string? subworld = null;
         IReadOnlyList<string>? relatedWorlds = null;
         string? status = null;
+        string? epistemic = null;
         IReadOnlyList<string>? sections = null;
         IReadOnlyList<string>? supersedes = null;
         IReadOnlyList<string>? supersededBy = null;
@@ -315,6 +324,7 @@ public sealed record OkfFrontmatter
                 case "related_worlds" when kv.Value.StartsWith('[') && kv.Value.EndsWith(']'):
                     relatedWorlds = ParseList(kv.Value); break;
                 case "status": status = Unquote(kv.Value); break;
+                case "epistemic": epistemic = Unquote(kv.Value); break;
                 case "sections" when kv.Value.StartsWith('[') && kv.Value.EndsWith(']'):
                     sections = ParseList(kv.Value); break;
                 case "supersedes" when kv.Value.StartsWith('[') && kv.Value.EndsWith(']'):
@@ -360,6 +370,7 @@ public sealed record OkfFrontmatter
             Subworld = subworld,
             RelatedWorlds = relatedWorlds,
             Status = status,
+            Epistemic = epistemic,
             Sections = sections,
             Supersedes = supersedes,
             SupersededBy = supersededBy,

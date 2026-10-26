@@ -35,6 +35,16 @@ public static partial class CanonDocMigrator
     [GeneratedRegex(@"^-\s*supersedes:\s*(?<v>.+?)\s*$")]
     private static partial Regex SupersedesBulletRegex();
 
+    // Card-body provenance (P-KB-2026-10-26-01 P2): bold and plain bullet forms.
+    [GeneratedRegex(@"^-\s*\*{0,2}card_id\*{0,2}\s*:\s*(?<v>.*?)\s*$")]
+    private static partial Regex CardIdBulletRegex();
+
+    [GeneratedRegex(@"^-\s*\*{0,2}epistemic_basis\*{0,2}\s*:\s*(?<v>.*?)\s*$")]
+    private static partial Regex EpistemicBasisBulletRegex();
+
+    [GeneratedRegex(@"^-\s*\*{0,2}verified_utc\*{0,2}\s*:\s*(?<v>.*?)\s*$")]
+    private static partial Regex VerifiedUtcBulletRegex();
+
     [GeneratedRegex(@"^-\s*superseded_by:\s*(?<v>.+?)\s*$")]
     private static partial Regex SupersededByBulletRegex();
 
@@ -152,6 +162,8 @@ public static partial class CanonDocMigrator
         var title = FindTitle(rest) ?? existing?.Title;
         var description = FindDescription(rest, title) ?? existing?.Description;
         var verifiedAt = FindVerifiedDate(rest) ?? existing?.Verified?.At;
+        var (cardEpistemic, cardVerifiedUtc) = CollectCardProvenance(rest);
+        if (cardVerifiedUtc is not null && verifiedAt is null) verifiedAt = cardVerifiedUtc;
 
         var fm = new OkfFrontmatter
         {
@@ -165,6 +177,7 @@ public static partial class CanonDocMigrator
             Subworld = subworld ?? existing?.Subworld,
             Contour = contourOverride ?? existing?.Contour,
             Verified = verifiedAt is null ? null : new OkfVerified("human:operator", verifiedAt),
+            Epistemic = existing?.Epistemic ?? cardEpistemic,
             SpeechSituation = CollectSpeechSituation(rest) ?? existing?.SpeechSituation,
             Status = FindStatus(rest) ?? existing?.Status,
             Sections = CollectSectionIds(rest) is { Count: > 0 } ids ? ids : null,
@@ -474,6 +487,32 @@ public static partial class CanonDocMigrator
         return latin > 0 ? "en" : null;
     }
 
+    private static (string? Epistemic, string? VerifiedUtc) CollectCardProvenance(string rest)
+    {
+        string? epistemic = null;
+        string? verifiedUtc = null;
+        foreach (var line in rest.Replace("\r\n", "\n").Split('\n'))
+        {
+            var t = line.Trim();
+            var m = EpistemicBasisBulletRegex().Match(t);
+            if (m.Success)
+            {
+                var v = SanitizeScalar(m.Groups["v"].Value.Trim('*', ' '));
+                if (v.Length > 0) epistemic = v;
+                continue;
+            }
+
+            m = VerifiedUtcBulletRegex().Match(t);
+            if (m.Success)
+            {
+                var v = SanitizeScalar(m.Groups["v"].Value.Trim('*', ' '));
+                if (v.Length > 0) verifiedUtc = v;
+            }
+        }
+
+        return (epistemic, verifiedUtc);
+    }
+
     private static string? FindVerifiedDate(string rest)
     {
         var match = VerifiedRegex().Match(rest);
@@ -491,7 +530,10 @@ public static partial class CanonDocMigrator
                 && !IsVerifiedOnlyLine(t)
                 && !IsRemovableStatusLine(t)
                 && !SupersedesBulletRegex().IsMatch(t)
-                && !SupersededByBulletRegex().IsMatch(t);
+                && !SupersededByBulletRegex().IsMatch(t)
+                && !CardIdBulletRegex().IsMatch(t)
+                && !EpistemicBasisBulletRegex().IsMatch(t)
+                && !VerifiedUtcBulletRegex().IsMatch(t);
         }).ToList();
         return string.Join('\n', kept);
     }
