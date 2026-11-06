@@ -216,7 +216,13 @@ public sealed class LanguageRegistry
             _ => CdpLanguages.Any,
         };
 
-        return new ProjectOpenResult(root, rule.Kind, language, [anchor], anchor, null);
+        // Mixed solutions often carry a sibling tsconfig.json for their JS layer
+        // (wwwroot bridges, editor tooling). Surfacing it as TsConfigPath lets the
+        // TS worker run diagnostics on .js buffers without a separate cdp_open —
+        // the session language stays the solution-inferred one.
+        var tsconfig = Path.Combine(root, "tsconfig.json");
+        return new ProjectOpenResult(root, rule.Kind, language, [anchor], anchor,
+            File.Exists(tsconfig) ? tsconfig : null);
     }
 
     private static ProjectOpenResult ResultFor(string root, LanguageDetectRule rule, string anchor)

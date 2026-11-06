@@ -243,6 +243,32 @@ public class ProjectOpenDetectorTests
         }
     }
 
+    [Fact]
+    public void Detect_Slnx_With_Sibling_Tsconfig_Sets_TsConfigPath_Keeps_Solution_Language()
+    {
+        var dir = CreateTempDir();
+        try
+        {
+            var csproj = Path.Combine(dir, "App.csproj");
+            File.WriteAllText(csproj, "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+            var slnx = Path.Combine(dir, "App.slnx");
+            File.WriteAllText(slnx, "<Solution><Project Path=\"App.csproj\" /></Solution>");
+            var tsconfig = Path.Combine(dir, "tsconfig.json");
+            File.WriteAllText(tsconfig, "{ \"compilerOptions\": { \"allowJs\": true, \"checkJs\": true } }");
+
+            var r = Langs.Detect(slnx);
+            Assert.Equal("sln", r.Kind);
+            // Mixed solution keeps the solution-inferred language — no Typescript flip.
+            Assert.Equal(CdpLanguages.Csharp, r.Language);
+            Assert.Equal(tsconfig, r.TsConfigPath);
+            Assert.Equal(slnx, r.SolutionOrProjectPath);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
     private static string CreateTempDir()
     {
         var dir = Path.Combine(Path.GetTempPath(), "cdp-open-" + Guid.NewGuid().ToString("N"));
