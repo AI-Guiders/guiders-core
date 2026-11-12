@@ -15,6 +15,16 @@ public sealed class LocalSettings
     public required WorkspaceSettings Workspace { get; init; }
 
     public required StatusSettings Status { get; init; }
+
+    /// <summary>Inline git versioning (ADR-027). Defaults resolve git from PATH.</summary>
+    public GitSettings Git { get; init; } = new();
+}
+
+/// <summary>[git] section: path to the git binary (empty = PATH lookup, ADR-027).</summary>
+public sealed class GitSettings
+{
+    /// <summary>Full path to git.exe, or empty to resolve from PATH.</summary>
+    public string Path { get; init; } = "";
 }
 
 public sealed class WorkspaceSettings

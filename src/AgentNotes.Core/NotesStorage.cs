@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -326,10 +325,11 @@ public sealed partial class NotesStorage
 
     private static readonly JsonSerializerOptions JsonOptions = AigJson.Indented;
 
-    public string WriteKnowledgeFile(string? knowledgePath, string filePath, string content, bool saveRevision = true, string? knowledgeRootId = null, bool allowShrink = false)
+    public string WriteKnowledgeFile(string? knowledgePath, string filePath, string content, string? knowledgeRootId = null, bool allowShrink = false)
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         if (File.Exists(fullPath))
         {
             var current = File.ReadAllText(fullPath, Encoding.UTF8);
@@ -341,9 +341,6 @@ public sealed partial class NotesStorage
                     "Pass allow_shrink=true when the shorter body is intentional " +
                     "(or use append_knowledge_file / upsert_knowledge_section).");
             }
-
-            if (saveRevision)
-                WriteKnowledgeRevision(root, filePath, current, "write");
         }
 
         var dir = Path.GetDirectoryName(fullPath);
@@ -351,49 +348,39 @@ public sealed partial class NotesStorage
             Directory.CreateDirectory(dir);
         File.WriteAllText(fullPath, content, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, $"write");
         return "OK";
     }
 
-    private void WriteKnowledgeRevision(string root, string filePath, string snapshotContent, string reason)
-    {
-        var revisionsDir = Path.Combine(root, KnowledgeDirName, RevisionsDirName);
-        Directory.CreateDirectory(revisionsDir);
-        var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
-        var safeName = filePath.Replace('/', '-').Replace('\\', '-');
-        var revisionName = $"{timestamp}-{NormalizeReason(reason)}-{safeName}-{ComputeShortHash(snapshotContent)}.md";
-        var revisionPath = Path.Combine(revisionsDir, revisionName);
-        File.WriteAllText(revisionPath, snapshotContent, Utf8NoBom);
-    }
-
-    public string AppendKnowledgeFile(string? knowledgePath, string filePath, string content, bool saveRevision = true, string? knowledgeRootId = null)
+    public string AppendKnowledgeFile(string? knowledgePath, string filePath, string content, string? knowledgeRootId = null)
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         var existing = File.Exists(fullPath) ? File.ReadAllText(fullPath, Encoding.UTF8) : "";
-        if (saveRevision && existing.Length > 0)
-            WriteKnowledgeRevision(root, filePath, existing, "append");
         var dir = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
         var separator = existing.Length > 0 && !existing.EndsWith('\n') ? "\n" : "";
         File.WriteAllText(fullPath, existing + separator + content, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, "append");
         return "OK";
     }
 
-    public string UpsertKnowledgeSection(string? knowledgePath, string filePath, string sectionId, string content, bool saveRevision = true, string? knowledgeRootId = null)
+    public string UpsertKnowledgeSection(string? knowledgePath, string filePath, string sectionId, string content, string? knowledgeRootId = null)
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         var dir = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
         var existing = File.Exists(fullPath) ? File.ReadAllText(fullPath, Encoding.UTF8) : "";
-        if (saveRevision && existing.Length > 0)
-            WriteKnowledgeRevision(root, filePath, existing, "upsert");
         var next = SectionMarkup.UpsertBlock(existing, sectionId, content);
         File.WriteAllText(fullPath, next, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, $"upsert section {sectionId}");
         return "OK";
     }
 
@@ -401,10 +388,12 @@ public sealed partial class NotesStorage
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         if (!File.Exists(fullPath))
             return "NO_CHANGES";
         File.Delete(fullPath);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, "delete file");
         return "OK";
     }
 
@@ -412,6 +401,7 @@ public sealed partial class NotesStorage
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         if (!File.Exists(fullPath))
             return "NO_CHANGES";
         var existing = File.ReadAllText(fullPath, Encoding.UTF8);
@@ -426,6 +416,7 @@ public sealed partial class NotesStorage
         var next = JoinBlocks(before, after);
         File.WriteAllText(fullPath, next, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, $"delete section {sectionId}");
         return "OK";
     }
 
@@ -436,14 +427,14 @@ public sealed partial class NotesStorage
     }
 
     public string Write(string workspacePath, string content) =>
-        SaveWithRevision(GetNotesPath(workspacePath), content, "write");
+        SaveVersioned(GetNotesPath(workspacePath), content, "write");
 
     public string Append(string workspacePath, string contentToAppend)
     {
         var notesPath = GetNotesPath(workspacePath);
         var existing = File.Exists(notesPath) ? File.ReadAllText(notesPath, Encoding.UTF8) : "";
         var separator = existing.Length > 0 && !existing.EndsWith('\n') ? "\n" : "";
-        return SaveWithRevision(notesPath, existing + separator + contentToAppend, "append");
+        return SaveVersioned(notesPath, existing + separator + contentToAppend, "append");
     }
 
     public string UpsertSection(string workspacePath, string sectionId, string content)
@@ -451,7 +442,7 @@ public sealed partial class NotesStorage
         var notesPath = GetNotesPath(workspacePath);
         var existing = File.Exists(notesPath) ? File.ReadAllText(notesPath, Encoding.UTF8) : "";
         var next = SectionMarkup.UpsertBlock(existing, sectionId, content);
-        return SaveWithRevision(notesPath, next, $"upsert-{sectionId}");
+        return SaveVersioned(notesPath, next, $"upsert-{sectionId}");
     }
 
     public string DeleteSection(string workspacePath, string sectionId)
@@ -469,7 +460,7 @@ public sealed partial class NotesStorage
         var before = existing[..start].TrimEnd('\r', '\n');
         var after = existing[(end + endMarker.Length)..].TrimStart('\r', '\n');
         var next = JoinBlocks(before, after);
-        return SaveWithRevision(notesPath, next, $"delete-{sectionId}");
+        return SaveVersioned(notesPath, next, $"delete-{sectionId}");
     }
 
     public string ValidateSections(string workspacePath)
@@ -498,7 +489,7 @@ public sealed partial class NotesStorage
 
         if (!changed)
             return "NO_CHANGES";
-        return SaveWithRevision(notesPath, normalized, "normalize-sections");
+        return SaveVersioned(notesPath, normalized, "normalize-sections");
     }
 
     public string ValidateKnowledgeSections(string? knowledgePath, string filePath, string? knowledgeRootId = null)
@@ -509,7 +500,7 @@ public sealed partial class NotesStorage
         return SectionMarkup.ToJson(SectionMarkup.Analyze(existing));
     }
 
-    public string NormalizeKnowledgeSections(string? knowledgePath, string filePath, bool apply, bool saveRevision = true, string? knowledgeRootId = null)
+    public string NormalizeKnowledgeSections(string? knowledgePath, string filePath, bool apply, string? knowledgeRootId = null)
     {
         var root = ResolveKnowledgeRootForWrite(knowledgePath, knowledgeRootId);
         var fullPath = GetKnowledgeFilePathFromRoot(root, filePath);
@@ -529,13 +520,13 @@ public sealed partial class NotesStorage
 
         if (!changed)
             return "NO_CHANGES";
-        if (saveRevision && existing.Length > 0)
-            WriteKnowledgeRevision(root, filePath, existing, "normalize-sections");
+        EnsureGitCleanForWrite(root, fullPath, filePath);
         var dir = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrWhiteSpace(dir))
             Directory.CreateDirectory(dir);
         File.WriteAllText(fullPath, normalized, Utf8NoBom);
         InvalidateKnowledgeTagIndex(root);
+        GitCommitKnowledge(root, fullPath, "normalize sections");
         return "OK";
     }
 
@@ -585,7 +576,7 @@ public sealed partial class NotesStorage
             throw new ArgumentException("revision_file not found.");
 
         var target = File.ReadAllText(revisionPath, Encoding.UTF8);
-        var result = SaveWithRevision(notesPath, target, $"rollback-{Path.GetFileNameWithoutExtension(resolvedRevisionFile)}");
+        var result = SaveVersioned(notesPath, target, $"rollback-{Path.GetFileNameWithoutExtension(resolvedRevisionFile)}");
         return result == "NO_CHANGES" ? $"NO_CHANGES ({resolvedRevisionFile})" : $"OK ({resolvedRevisionFile})";
     }
 
@@ -635,7 +626,11 @@ public sealed partial class NotesStorage
         return JsonSerializer.Serialize(payload, AigJson.Indented);
     }
 
-    private string SaveWithRevision(string notesPath, string newContent, string reason)
+    /// <summary>
+    /// Atomic write + inline git commit (ADR-027). Snapshots (.revisions) are no longer created;
+    /// history lives in git. Legacy .revisions stay readable via ListRevisions/Rollback.
+    /// </summary>
+    private string SaveVersioned(string notesPath, string newContent, string reason)
     {
         lock (_sync)
         {
@@ -645,10 +640,8 @@ public sealed partial class NotesStorage
             if (currentContent == newContent)
                 return "NO_CHANGES";
 
-            if (hasCurrent)
-                WriteRevisionSnapshot(notesPath, currentContent, reason);
-
             AtomicWriteAllText(notesPath, newContent);
+            CommitHotNotes(notesPath, reason);
             return "OK";
         }
     }
@@ -673,37 +666,66 @@ public sealed partial class NotesStorage
         File.Move(tempPath, path, true);
     }
 
-    private static void WriteRevisionSnapshot(string notesPath, string snapshotContent, string reason)
-    {
-        var revisionsDir = GetRevisionsDir(notesPath);
-        Directory.CreateDirectory(revisionsDir);
+    /// <summary>ADR-027: git repo root for a knowledge root (cached per root), null when unversioned.</summary>
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string?> GitRootCache = new(StringComparer.OrdinalIgnoreCase);
 
-        var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
-        var revisionName = $"{timestamp}-{NormalizeReason(reason)}-{ComputeShortHash(snapshotContent)}.md";
-        var revisionPath = Path.Combine(revisionsDir, revisionName);
-        File.WriteAllText(revisionPath, snapshotContent, Utf8NoBom);
+    private static string? GitRepoRootFor(string rootDir) =>
+        GitRootCache.GetOrAdd(rootDir, static dir => GitHelper.FindRepoRoot(dir));
+
+    /// <summary>ADR-027: refuse to overwrite a file that carries uncommitted external edits.</summary>
+    private static void EnsureGitCleanForWrite(string root, string fullPath, string knowledgeFilePath)
+    {
+        var repo = GitRepoRootFor(root);
+        if (repo is null)
+            return; // unversioned root — startup check reports this loudly; writes proceed unprotected
+
+        var rel = Path.GetRelativePath(repo, fullPath).Replace('\\', '/');
+        if (GitHelper.IsFileDirty(repo, rel))
+            throw new InvalidOperationException(
+                $"git: '{knowledgeFilePath}' has uncommitted external edits. Commit or stash them first: " +
+                $"git -C \"{repo}\" add -- {rel} && git -C \"{repo}\" commit. " +
+                "MCP не пишет поверх незакоммиченных правок (ADR-027).");
     }
 
-    private static string NormalizeReason(string reason)
+    /// <summary>ADR-027: path-scoped git commit right after the write (no debounce, no add -A).</summary>
+    private static void GitCommitKnowledge(string root, string fullPath, string operation)
     {
-        var buffer = new StringBuilder(reason.Length);
-        foreach (var ch in reason.ToLowerInvariant())
-        {
-            if (char.IsAsciiLetterOrDigit(ch) || ch is '.' or '_' or '-')
-                buffer.Append(ch);
-            else if (buffer.Length == 0 || buffer[^1] != '-')
-                buffer.Append('-');
-        }
+        var repo = GitRepoRootFor(root);
+        if (repo is null)
+            return;
 
-        return buffer.ToString().Trim('-') is { Length: > 0 } normalized
-            ? normalized
-            : "update";
+        var rel = Path.GetRelativePath(repo, fullPath).Replace('\\', '/');
+        if (!GitHelper.TryCommit(repo, rel, $"MCP {operation}: {rel}", out _, out var detail))
+            throw new InvalidOperationException($"git commit failed after {operation} of '{rel}': {detail}");
     }
 
-    private static string ComputeShortHash(string content)
+    /// <summary>
+    /// Commit the hot notes file. Only when it belongs to the configured KB repo, or sits at the top
+    /// level of its own repo — never auto-commit into a foreign code repo that just happens to contain
+    /// a nested .cascade-ide/agent-notes.md.
+    /// </summary>
+    private static void CommitHotNotes(string notesPath, string reason)
     {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(content));
-        return Convert.ToHexString(hash.AsSpan(0, 4)).ToLowerInvariant();
+        var dir = Path.GetDirectoryName(notesPath);
+        if (string.IsNullOrWhiteSpace(dir))
+            return;
+
+        var repo = GitRepoRootFor(dir);
+        if (repo is null)
+            return;
+
+        var inKbRepo = AgentNotesRuntime.TryGetPrimaryKnowledgeRoot(out var kbRoot)
+            && string.Equals(Path.GetFullPath(repo), Path.GetFullPath(kbRoot), StringComparison.OrdinalIgnoreCase);
+        var atRepoTopLevel = string.Equals(
+            Path.GetFullPath(dir).TrimEnd('\\', '/'),
+            Path.GetFullPath(repo).TrimEnd('\\', '/'),
+            StringComparison.OrdinalIgnoreCase);
+        if (!inKbRepo && !atRepoTopLevel)
+            return;
+
+        var rel = Path.GetRelativePath(repo, notesPath).Replace('\\', '/');
+        if (!GitHelper.TryCommit(repo, rel, $"MCP notes {reason}: {rel}", out _, out var detail))
+            throw new InvalidOperationException($"git commit failed for hot notes ({reason}): {detail}");
     }
 
     private static string JoinBlocks(params string[] blocks)

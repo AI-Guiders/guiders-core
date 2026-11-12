@@ -414,6 +414,6 @@ public sealed partial class NotesStorage
             return JsonSerializer.Serialize(payload, AigJson.Indented);
         }
 
-        return SaveWithRevision(notesPath, compacted, "compact-hot-context");
+        return SaveVersioned(notesPath, compacted, "compact-hot-context");
     }
 }

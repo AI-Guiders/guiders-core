@@ -11,3 +11,7 @@ scope_aliases = "example/scope-alias-map-v1.md"
 enabled = false
 port = 17341
 bind = "127.0.0.1"
+
+# ADR-027: inline git versioning. path = "" → git из PATH.
+[git]
+path = ""

@@ -168,7 +168,8 @@ public static partial class CanonDocMigrator
         var fm = new OkfFrontmatter
         {
             Type = typeOverride
-                ?? UpgradeHeuristicType(existing?.Type, fileName),
+                ?? UpgradeHeuristicType(existing?.Type, fileName)
+                ?? "Note",
             Title = title,
             Description = description,
             Tags = tags,

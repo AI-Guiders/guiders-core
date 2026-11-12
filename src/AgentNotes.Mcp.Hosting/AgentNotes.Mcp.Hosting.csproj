@@ -10,7 +10,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
+    <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
     <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.2.1" Condition="!Exists('..\AgentNotes.Core\AgentNotes.Core.csproj')" />
   </ItemGroup>
   <ItemGroup Condition="Exists('..\AgentNotes.Core\AgentNotes.Core.csproj')">

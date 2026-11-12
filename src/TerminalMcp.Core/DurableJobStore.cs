@@ -17,7 +17,9 @@ public static class DurableJobStore
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        // UnsafeRelaxedJsonEscaping: default encoder escapes Cyrillic/<>& as \uXXXX — wire token bloat (same class as McpJsonRelax).
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public static string? RootOverrideForTests { get; set; }

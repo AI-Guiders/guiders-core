@@ -11,6 +11,8 @@ internal sealed class AgentNotesMcpConfigDocument
 
     public StatusSection? Status { get; set; }
 
+    public GitSection? Git { get; set; }
+
     public LocalSettings Materialize(AgentNotesMcpConfigDocument embeddedDefaults)
     {
         var schemaVersion = Version > 0 ? Version : embeddedDefaults.Version;
@@ -24,6 +26,8 @@ internal sealed class AgentNotesMcpConfigDocument
 
         var status = StatusSection.Resolve(embeddedDefaults.Status, Status);
 
+        var git = GitSection.Resolve(Git);
+
         return new LocalSettings
         {
             SchemaVersion = schemaVersion,
@@ -31,7 +35,8 @@ internal sealed class AgentNotesMcpConfigDocument
             KnowledgeRoots = knowledge.NamedRoots,
             ReadOnlyKnowledgeRoots = knowledge.ReadOnlyRoots,
             Workspace = workspace,
-            Status = status
+            Status = status,
+            Git = git
         };
     }
 }
@@ -178,6 +183,17 @@ internal sealed class StatusSection
 internal sealed class StatusPreviewSection
 {
     public string? Workspace { get; set; }
+}
+
+/// <summary>[git] section (ADR-027): path to the git binary; empty = PATH lookup.</summary>
+internal sealed class GitSection
+{
+    public string? Path { get; set; }
+
+    public static GitSettings Resolve(GitSection? user) => new()
+    {
+        Path = user?.Path?.Trim() ?? ""
+    };
 }
 
 internal readonly record struct ResolvedKnowledge(

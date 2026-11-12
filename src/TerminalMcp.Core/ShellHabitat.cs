@@ -161,7 +161,8 @@ public sealed class ShellHabitat
             ts_utc = h.TsUtc,
             stdout = CapTail(h.Stdout, maxChars),
             stderr = CapTail(h.Stderr, maxChars),
-            truncated = h.Stdout.Length + h.Stderr.Length > maxChars
+            truncated = h.Stdout.Length + h.Stderr.Length > maxChars,
+            hint = DetectElevationHint(h.ExitCode, h.Stdout, h.Stderr)
         }, Pretty);
     }
 
@@ -456,10 +457,49 @@ public sealed class ShellHabitat
             stderr = CapTail(entry.Stderr, AgentBodyChars),
             history_index = tab.History.Count - 1,
             truncated = entry.Stdout.Length + entry.Stderr.Length > AgentBodyChars,
-            hint = entry.Stdout.Length + entry.Stderr.Length > AgentBodyChars
-                ? "Body capped for context tax — cdp_shell_last max_chars=12000 for fuller tail"
-                : null
+            hint = DetectElevationHint(exit, entry.Stdout, entry.Stderr)
+                ?? (entry.Stdout.Length + entry.Stderr.Length > AgentBodyChars
+                    ? "Body capped for context tax — cdp_shell_last max_chars=12000 for fuller tail"
+                    : null)
         }, Pretty);
+
+    /// <summary>
+    /// Access-denied / elevation fingerprint in command output, platform-aware (Core ships
+    /// win/linux/osx RIDs — no win-only semantics in the shared path). Windows: ERROR_ACCESS_DENIED /
+    /// ERROR_ELEVATION_REQUIRED ("OpenService FAILED 5", "Run as administrator"). POSIX: EACCES /
+    /// EPERM family. The agent otherwise infers the missing-privilege cause from raw output alone.
+    /// </summary>
+    private static string? DetectElevationHint(int exit, string stdout, string stderr)
+    {
+        if (exit == 0)
+            return null;
+        var body = stdout + stderr;
+        if (body.Length == 0)
+            return null;
+
+        if (OperatingSystem.IsWindows())
+        {
+            if (body.Contains("Access is denied", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("Отказано в доступе", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("FAILED 5:", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("required elevation", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("elevation required", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("Run as administrator", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("a terminal is required", StringComparison.OrdinalIgnoreCase))
+                return "Access denied — this shell is not elevated. Retry with sudo <cmd> (pwsh), or from an elevated console; service/registry/admin ops need it.";
+            return null;
+        }
+
+        // POSIX: permission failures — sudo/DOAS or fix file perms; not a Windows-elevation concept.
+        if (body.Contains("Permission denied", StringComparison.Ordinal)          // coreutils/glibc errno string
+            || body.Contains("отказано в доступе", StringComparison.OrdinalIgnoreCase) // ru_RU locale coreutils
+            || body.Contains("EACCES", StringComparison.Ordinal)
+            || body.Contains("EPERM", StringComparison.Ordinal)
+            || body.Contains("operation not permitted", StringComparison.Ordinal)
+            || body.Contains("a password is required", StringComparison.OrdinalIgnoreCase)) // sudo no-tty
+            return "Permission denied — run with sudo, or check file ownership/perms (EACCES/EPERM).";
+        return null;
+    }
 
     private static void BeginCapture(Tab tab, Process p)
     {
@@ -533,7 +573,12 @@ public sealed class ShellHabitat
         return $"…(+{s.Length - max} chars)\n" + s[^max..];
     }
 
-    private static readonly JsonSerializerOptions Pretty = new() { WriteIndented = true };
+    // UnsafeRelaxedJsonEscaping: default encoder escapes Cyrillic/<>& as \uXXXX — wire token bloat (same class as McpJsonRelax).
+    private static readonly JsonSerializerOptions Pretty = new()
+    {
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
 
     private readonly record struct ShellSpec(string Kind, string Exe);
 

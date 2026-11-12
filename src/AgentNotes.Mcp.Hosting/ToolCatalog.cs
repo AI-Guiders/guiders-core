@@ -7,8 +7,10 @@ public static class ToolCatalog
 {
     private static JsonElement Schema(object schema) => JsonSerializer.SerializeToElement(schema);
 
-    public static List<Tool> Build() =>
-    [
+    public static List<Tool> Build()
+    {
+        List<Tool> tools =
+        [
         new()
         {
             Name = "memory_health",
@@ -135,7 +137,7 @@ public static class ToolCatalog
         new()
         {
             Name = "list_agent_notes_revisions",
-            Description = "Список ревизий заметок для rollback. Ревизии хранятся рядом с файлом заметок в подпапке .revisions.",
+            Description = "LEGACY (ADR-027): список ревизий из .revisions/. Новые записи больше не создают ревизий — история в git (git log --follow). Существующие .revisions остаются читаемыми.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -150,7 +152,7 @@ public static class ToolCatalog
         new()
         {
             Name = "rollback_agent_notes",
-            Description = "Откатить заметки к выбранной ревизии (или к последней, если revision_file не задан). Текущее содержимое перед откатом тоже сохраняется как ревизия.",
+            Description = "LEGACY (ADR-027): откатить заметки к ревизии из .revisions/. Новые ревизии не создаются — для свежей истории используй git (git log --follow agent-notes.md + git checkout <commit> -- agent-notes.md).",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -240,15 +242,14 @@ public static class ToolCatalog
                     knowledge_path = new { type = "string", description = "Корень knowledge (опционально)." },
                     knowledge_root_id = new { type = "string", description = "id корня из --config (опционально)." },
                     file_path = new { type = "string", description = "Относительный путь в knowledge/." },
-                    apply = new { type = "boolean", description = "true — записать, false — превью JSON." },
-                    save_revision = new { type = "boolean", description = "Для knowledge: revision перед записью (по умолчанию true)." }
+                    apply = new { type = "boolean", description = "true — записать, false — превью JSON." }
                 }
             })
         },
         new()
         {
             Name = "write_knowledge_file",
-            Description = "Записать файл в каталог knowledge/ (полная замена). Перед записью текущая версия сохраняется в knowledge/.revisions/ (если save_revision=true). Запись только в primary; read-only roots (knowledge_root_id=group) отклоняются. Shorter rewrite of an existing file requires allow_shrink=true (same policy as cdp_buffer set_text) — prefer append/upsert for surgical edits.",
+            Description = "Записать файл в каталог knowledge/ (полная замена). История — через git commit (ADR-027), .revisions не пишутся; запись поверх незакоммиченных внешних правок отклоняется. Запись только в primary; read-only roots (knowledge_root_id=group) отклоняются. Shorter rewrite of an existing file requires allow_shrink=true (same policy as cdp_buffer set_text) — prefer append/upsert for surgical edits.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -258,7 +259,6 @@ public static class ToolCatalog
                     knowledge_root_id = new { type = "string", description = "Опционально. id из [knowledge.roots] или [[knowledge.read_only]] (напр. group). Чтение — любой корень; запись — только primary (user)." },
                     file_path = new { type = "string", description = "Относительный путь внутри knowledge/, например kb-music-acoustics-v1.md (без '..' и без абсолютного пути)." },
                     content = new { type = "string", description = "Полное содержимое файла." },
-                    save_revision = new { type = "boolean", description = "Сохранить текущую версию в knowledge/.revisions/ перед записью (по умолчанию true)." },
                     allow_shrink = new { type = "boolean", description = "Required when new body is shorter than existing file (intentional full rewrite). Default false." }
                 },
                 required = new[] { "file_path", "content" }
@@ -267,7 +267,7 @@ public static class ToolCatalog
         new()
         {
             Name = "append_knowledge_file",
-            Description = "Добавить блок в конец файла в knowledge/ без перезаписи. Перед добавлением текущая версия сохраняется в knowledge/.revisions/ (если save_revision=true).",
+            Description = "Добавить блок в конец файла в knowledge/ без перезаписи. История — через git commit (ADR-027), .revisions не пишутся.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -276,8 +276,7 @@ public static class ToolCatalog
                     knowledge_path = new { type = "string", description = "Корень репозитория knowledge (каталог с подпапкой knowledge/). Опционально: primary из --config. Не задавать вместе с knowledge_root_id." },
                     knowledge_root_id = new { type = "string", description = "Опционально. id из [knowledge.roots] или [[knowledge.read_only]] (напр. group). Чтение — любой корень; запись — только primary (user)." },
                     file_path = new { type = "string", description = "Относительный путь внутри knowledge/." },
-                    content = new { type = "string", description = "Текст для добавления в конец файла (перед ним при необходимости добавляется перевод строки)." },
-                    save_revision = new { type = "boolean", description = "Сохранить текущую версию в knowledge/.revisions/ перед добавлением (по умолчанию true)." }
+                    content = new { type = "string", description = "Текст для добавления в конец файла (перед ним при необходимости добавляется перевод строки)." }
                 },
                 required = new[] { "file_path", "content" }
             })
@@ -285,7 +284,7 @@ public static class ToolCatalog
         new()
         {
             Name = "upsert_knowledge_section",
-            Description = "Вставить или обновить секцию в файле knowledge/ по section_id (маркеры <!-- section:ID --> ... <!-- /section:ID -->). Дубли/битая разметка → REJECTED. Перед изменением текущая версия сохраняется в knowledge/.revisions/ (если save_revision=true).",
+            Description = "Вставить или обновить секцию в файле knowledge/ по section_id (маркеры <!-- section:ID --> ... <!-- /section:ID -->). Дубли/битая разметка → REJECTED. История — через git commit (ADR-027), .revisions не пишутся.",
             InputSchema = Schema(new
             {
                 type = "object",
@@ -295,8 +294,7 @@ public static class ToolCatalog
                     knowledge_root_id = new { type = "string", description = "Опционально. id из [knowledge.roots] или [[knowledge.read_only]] (напр. group). Чтение — любой корень; запись — только primary (user)." },
                     file_path = new { type = "string", description = "Относительный путь внутри knowledge/, например index-knowledge-router-v1.md." },
                     section_id = new { type = "string", description = "Стабильный ID секции (A-Za-z0-9._-)." },
-                    content = new { type = "string", description = "Новое содержимое секции." },
-                    save_revision = new { type = "boolean", description = "Сохранить текущую версию в knowledge/.revisions/ перед изменением (по умолчанию true)." }
+                    content = new { type = "string", description = "Новое содержимое секции." }
                 },
                 required = new[] { "file_path", "section_id", "content" }
             })
@@ -507,7 +505,20 @@ public static class ToolCatalog
                 required = new[] { "delta_radius" }
             })
         }
-    ];
+        ];
+
+        // All handlers in this facade return a markdown text report — declare it
+        // once here so code-mode clients render a typed signature (string) for
+        // every tool instead of an opaque unknown.
+        foreach (var tool in tools)
+            tool.OutputSchema ??= Schema(new
+            {
+                type = "string",
+                description = "Markdown text report from the AgentNotes tool."
+            });
+
+        return tools;
+    }
 
     public static IReadOnlyList<(string Name, string Description)> ListSummaries() =>
         Build()
