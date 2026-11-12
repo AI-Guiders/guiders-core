@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>14</LangVersion>
+    <LangVersion>15</LangVersion>
     <RootNamespace>Cdp.Lsp</RootNamespace>
     <AssemblyName>Cdp.Lsp.Core</AssemblyName>
     <PackageId>AIGuiders.Cdp.Lsp.Core</PackageId>
